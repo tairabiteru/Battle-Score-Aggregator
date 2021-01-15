@@ -1,0 +1,155 @@
+from dash.conf import conf
+from orm.team import Team, TeamSchema, TeamExists
+
+import json
+from marshmallow import Schema, fields, post_load
+import os
+
+
+conf.storageDirectory = os.path.join(conf.rootDirectory, "storage/")
+
+if not os.path.exists(conf.storageDirectory):
+    os.makedirs(conf.storageDirectory)
+
+
+class JudgeNotFound(Exception):
+    """Raised when a judge does not exist."""
+    pass
+
+
+class JudgeExists(Exception):
+    """Raised when a judge by the specified name already exists."""
+    pass
+
+
+class JudgeSchema(Schema):
+    username = fields.Str()
+    password = fields.Str()
+    teams = fields.List(fields.Nested(TeamSchema))
+
+    @post_load
+    def make_obj(self, data, **kwargs):
+        return Judge(**data)
+
+
+class Judge:
+    """
+    Define a judge.
+
+    Stores the username, the password (hashed and salted) and a list of
+    teams the judge is responsible for.
+    """
+
+    def __init__(self, **kwargs):
+        self.username = kwargs['username']
+        self.password = kwargs['password']
+        self.teams = kwargs['teams'] if 'teams' in kwargs else []
+
+    @classmethod
+    def obtain(cls, username):
+        """
+        Obtain a judge given the username.
+
+        If no judge is found, JudgeNotFound is raised.
+        """
+        try:
+            filename = os.path.join(conf.storageDirectory, f"{username.lower()}.json")
+            with open(filename, 'r', encoding='utf-8') as file:
+                return JudgeSchema().load(json.load(file))
+        except FileNotFoundError:
+            raise JudgeNotFound
+
+    @classmethod
+    def obtainall(cls):
+        """Obtain all judges."""
+        judges = []
+        for file in os.listdir(conf.storageDirectory):
+            filename = os.path.join(conf.storageDirectory, file)
+            with open(filename, 'r', encoding='utf-8') as file:
+                judges.append(JudgeSchema().load(json.load(file)))
+        return judges
+
+    @classmethod
+    def create(cls, username, password, teamnames):
+        """
+        Create a judge.
+
+        Takes their username, password, and a list of team names they will be
+        responsible for. Team objects are created dynamically.
+        """
+        try:
+            judge = cls.obtain(username.lower())
+            raise JudgeExists
+        except JudgeNotFound:
+            pass
+
+        teams = []
+        for teamname in teamnames:
+            if teamname.lower() in list([team.name.lower() for team in cls.allTeams()]):
+                raise TeamExists(teamname)
+            teams.append(Team(name=teamname))
+
+        judge = Judge(username=username, password=password, teams=teams)
+        judge.save()
+        return judge
+
+    @classmethod
+    def allTeams(cls):
+        """Get a list of all teams."""
+        judges = cls.obtainall()
+        teams = []
+        for judge in judges:
+            teams += judge.teams
+        return teams
+
+    @classmethod
+    def placement(cls):
+        """
+        Obtain the 'placement' of all teams.
+
+        This is used when rendering the total scores.
+        """
+        teams = cls.allTeams()
+        placement = {}
+        place = 1
+        while len(teams) != 0:
+            team_placement = {}
+            highest = max([team.total for team in teams])
+            while max([team.total for team in teams]) == highest:
+                for team in teams:
+                    if team.total == highest:
+                        team_placement[team.name] = team.total
+                        teams.remove(team)
+                if teams == []:
+                    break
+            placement[str(place)] = team_placement
+            place += 1
+        return placement
+
+    @property
+    def scoretable(self):
+        """
+        Obtain scoretable.
+
+        The scoretable is an enumerated set of question numbers and the
+        stored scores associated with each team. It is used to render the
+        judge's scoring page.
+        """
+        questions = []
+        teams = Judge.allTeams()
+        for question, score in teams[0].questions.items():
+            q = {}
+            for team in teams:
+                q[team.name] = team.questions[question]
+            questions.append(q)
+        return enumerate(questions)
+
+    def save(self):
+        """Save to JSON."""
+        try:
+            os.makedirs(conf.storageDirectory)
+        except FileExistsError:
+            pass
+        filename = os.path.join(conf.storageDirectory, f"{self.username}.json")
+        with open(filename, 'w', encoding='utf-8') as file:
+            json.dump(JudgeSchema().dump(self), file, indent=4, separators=(',', ': '))

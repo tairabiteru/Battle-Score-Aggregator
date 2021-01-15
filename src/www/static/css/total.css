@@ -1,0 +1,43 @@
+table {
+  border-collapse: collapse;
+  font-family: Arial, Helvetica;
+}
+
+td, th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #626262;
+}
+
+tr:nth-child(odd) {
+  background-color: #424242;
+}
+
+tr:hover {
+  background-color: #ccc;
+}
+
+input {
+  color: inherit;
+  font-size: 20px;
+}
+
+th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background-color: #4CAF50;
+  color: white;
+}
+
+h1 {
+  font-family: Arial, Helvetica;
+}
+
+body {
+  font-family: Arial, Helvetica;
+  background-color: #424242;
+  color: white;
+}

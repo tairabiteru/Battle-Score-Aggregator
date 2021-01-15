@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/admin.css">
+  </head>
+
+  <h2>Add Judge</h2>
+  {% if response %}<p style="color: red;">{{ response }}</p>{% endif %}
+  <form action="/admin" method="post" id="newjudge">
+    <input id="username" type="text" placeholder="Username" name="username" required><br>
+    <input id="password" type="password" placeholder="Password" name="password" required><br>
+    <input id="password-repeat" type="password" placeholder="Confirm Password" name="password-repeat" oninput="checkPassword()" required>
+    <br>
+    <span id="passwordnomatch" style="visibility: hidden; color:red;">Passwords do not match.</span><br>
+    <br id="spacer">
+    <button id="addjudge" type="submit" disabled>Add Judge</button><button id="addteam" type="button" onclick="addTeam()">Add Team</button>
+  </form>
+  <br><br>
+  <h2>Existing Judges</h2>
+  <table>
+    <tr>
+      <th>Name</th>
+      <th>Teams</th>
+    </tr>
+    {% for judge in judges %}
+    <tr>
+      <td>{{ judge.username }}</td>
+      <td>
+        {% for team in judge.teams %}
+        {{ team.name }},
+        {% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <script src="/static/js/admin.js"></script>
+</html>

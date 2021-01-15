@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/total.css">
+  </head>
+
+  {% if placement %}
+    <table id="scoretable">
+      <tr>
+        <th>Place</th>
+        <th>Team</th>
+        <th>Score</th>
+      </tr>
+
+        {% for place, teams in placement.items() %}
+          {% for team, score in teams.items() %}
+          <tr>
+            <td id="{{ team }}_place">{{ place }}</td>
+            <td id="{{ team }}_name">{{ team }}</td>
+            <td id="{{ team }}_total">{{ score }}</td>
+          </tr>
+          {% endfor %}
+        {% endfor %}
+    </table>
+  {% else %}
+    No teams have been created yet.
+  {% endif %}
+  <script src="/static/js/total.js"></script>
+</html>
