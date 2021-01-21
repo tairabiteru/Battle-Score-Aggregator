@@ -124,21 +124,26 @@ if conf.adminEnabled:
 
         username = post.get("username")
         password = bcrypt.hash(post.get("password"))
+        judges = Judge.obtainall()
+
         teams = []
         for key, value in post.items():
             if key.startswith("team"):
+                if not value:
+                    return {'judges': judges, 'response': 'Team names cannot be empty.'}
                 teams.append(value)
+
+        if not teams:
+            return {'judges': judges, 'response': 'You must specify at least one team per judge.'}
 
         try:
             Judge.create(username, password, teams)
-            response = 'Judge successfully created.'
+            return {'judges': judges, 'response': 'Judge successfully created.'}
         except JudgeExists:
-            response = f"A judge named '{username}' already exists."
+            return {'judges': judges, 'response': f"A judge named '{username}' already exists."}
         except TeamExists as e:
-            response = f"A team named '{e.team}' already exists."
+            return {'judges': judges, 'response': f"A team named '{e.team}' already exists."}
 
-        judges = Judge.obtainall()
-        return {'judges': judges, 'response': response}
 else:
     @routes.get("/admin")
     async def admin_get(request):
