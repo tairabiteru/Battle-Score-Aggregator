@@ -103,6 +103,12 @@ class Judge:
         return teams
 
     @classmethod
+    def questionIsDone(cls, question):
+        """Determines if scoring is pending or final."""
+        return not any([q[question] == "" for q in cls.allTeams()])
+
+
+    @classmethod
     def placement(cls):
         """
         Obtain the 'placement' of all teams.
@@ -136,7 +142,7 @@ class Judge:
         judge's scoring page.
         """
         questions = []
-        teams = Judge.allTeams()
+        teams = self.teams
         for question, score in teams[0].questions.items():
             q = {}
             for team in teams:

@@ -43,14 +43,23 @@ Totals can be found at `http://host:port/total`. Here, the scores and placements
 - **Can this be used on the internet?** - Alone, no. The normal operating scenario for this system is for it to be running on a server on a LAN only. In other words, this should NOT be used on the internet, as the internal server is not robust enough for that application.
 
 ## Changelog
-* Ver. α 0.3
-  - Add in a failover message in the event that the session expires on the judge's page.
+* Ver. α 0.21
+  - Fixed a bug which caused the judge's page to render incorrectly.
 * Ver. α 0.2
   - Switch the position of the "Add Judge" and "Add Team" buttons.
   - Make it so that a judge cannot be added unless at least one team is added.
   - Make it so that team names cannot be empty.
 * Ver. α 0.1
   - Initial commit.
+
+## To-do
+- Add in a failover message in the event that the session expires on the judge's page.
+- Add the ability of the scoring page to know when all scores have been entered for a given question.
+- Remove "2" as a valid score.
+- Make the judge's page exportable as CSV.
+- Make the total page exportable as a cleaned HTML table.
+- Separate questions by round.
+- Make it so that the entire database can be exported as CSV in case of score challengers.
 
 ## License
 [GNU AGPLv3](https://choosealicense.com/licenses/agpl-3.0/)
