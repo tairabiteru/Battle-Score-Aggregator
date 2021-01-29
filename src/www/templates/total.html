@@ -5,26 +5,46 @@
     <link rel="stylesheet" href="/static/css/total.css">
   </head>
 
-  {% if placement %}
-    <table id="scoretable">
-      <tr>
-        <th>Place</th>
-        <th>Team</th>
-        <th>Score</th>
-      </tr>
-
-        {% for place, teams in placement.items() %}
-          {% for team, score in teams.items() %}
+  <div class="row">
+    <div class="column">
+      <h1>Totals</h1>
+      {% if placement %}
+        <table id="scoretable">
           <tr>
-            <td id="{{ team }}_place">{{ place }}</td>
-            <td id="{{ team }}_name">{{ team }}</td>
-            <td id="{{ team }}_total">{{ score }}</td>
+            <th>Place</th>
+            <th>Team</th>
+            <th>Score</th>
           </tr>
-          {% endfor %}
+
+            {% for place, teams in placement.items() %}
+              {% for team, score in teams.items() %}
+              <tr>
+                <td id="{{ team }}_place">{{ place }}</td>
+                <td id="{{ team }}_name">{{ team }}</td>
+                <td id="{{ team }}_total">{{ score }}</td>
+              </tr>
+              {% endfor %}
+            {% endfor %}
+        </table>
+      {% else %}
+        No teams have been created yet.
+      {% endif %}
+    </div>
+    <div class="column">
+      <h1>Scoring Status</h1>
+      <table id="judgetable">
+        <tr>
+          <th>Judge</th>
+          <th>Currently Scoring</th>
+        </tr>
+        {% for judge in judges %}
+        <tr>
+          <td>{{ judge.username|capitalize }}</td>
+          <td id="{{ judge.username }}">Q{{ judge.lastQuestionScored }}</td>
+        </tr>
         {% endfor %}
-    </table>
-  {% else %}
-    No teams have been created yet.
-  {% endif %}
+      </table>
+    </div>
+  </div>
   <script src="/static/js/total.js"></script>
 </html>

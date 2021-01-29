@@ -11,7 +11,11 @@ class Conf:
         'port': 8080,
         'rootDirectory': os.path.dirname(sys.modules['__main__'].__file__),
         'wwwDirectory': os.path.join(os.path.dirname(sys.modules['__main__'].__file__), "www"),
-        'adminEnabled': True
+        'adminEnabled': True,
+        'numberOfRounds': 7,
+        'questionsPerRound': 8,
+        'numberOfBonusRounds': 1,
+        'questionsPerBonusRound': 7
     }
 
     def __init__(self):

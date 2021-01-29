@@ -7,8 +7,7 @@
   </head>
 
   <body>
-    <h1>Battle Score Aggregator</h1>
-    <h3>Welcome, Right Honorable {{ judge.username }}.</h3>
+    <h1>Welcome, Right Honorable {{ judge.username }}.</h1>
 
     <table id="scoretable">
       <th>Question</th>
@@ -16,13 +15,19 @@
       <th id="team_{{ loop.index }}">{{ team.name }}</th>
       {% endfor %}
 
-      {% for number, question in judge.scoretable %}
+      {% for round, questions in judge.scoretable.items() %}
         <tr>
-          <td>Q{{ number + 1 }}</td>
-          {% for team, score in question.items() %}
-          <td><input oninput="validateScore()" type="number" id="{{ team }}_{{ number + 1 }}" min="0" max="5" value="{{ score }}"></td>
+          <td colspan="{{ judge.teams|length + 1 }}">{{ round }}</td>
+        </tr>
+
+        {% for number, scores in questions.items() %}
+        <tr>
+          <td>Q{{ number }} <div id="{{ number }}" style="display: inline;">🔄</div></td>
+          {% for team, score in scores.items() %}
+          <td><input oninput="validateScore()" type="number" id="{{ team }}_{{ number }}" min="0" max="5" value="{{ score }}"></td>
           {% endfor %}
         </tr>
+        {% endfor %}
       {% endfor %}
     </table>
   </body>

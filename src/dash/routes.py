@@ -13,14 +13,16 @@ from passlib.hash import bcrypt
 routes = web.RouteTableDef()
 
 
-async def get_user(request):
+async def get_user(request, redirect=True):
     """Obtain the current user from the session. If none exists, redirect to login."""
     session = await get_session(request)
     try:
         return session['username']
     except KeyError:
-        session['redirect'] = str(request.rel_url)
-        raise web.HTTPFound("/login")
+        if redirect:
+            session['redirect'] = str(request.rel_url)
+            raise web.HTTPFound("/login")
+        raise web.HTTPUnauthorized
 
 
 @routes.get("/")
@@ -77,7 +79,14 @@ async def login_POST(request):
 @template("total.html")
 async def total_GET(request):
     """Handle GET requests for /total"""
-    return {'placement': Judge.placement()}
+    return {'placement': Judge.placement(), 'judges': Judge.obtainall()}
+
+
+@routes.get("/export")
+@template("export.html")
+async def export_GET(request):
+    """Handle GET requests for /export"""
+    return {'placement': Judge.placement(), 'judges': Judge.obtainall()}
 
 
 @routes.get("/api/total")
@@ -89,22 +98,28 @@ async def total(request):
 @routes.post("/api/save-scores")
 async def api_saveScores_POST(request):
     """Handle AJAX requests for /judge"""
-    username = await get_user(request)
+    username = await get_user(request, redirect=False)
 
     judge = Judge.obtain(username)
     data = await request.json()
 
-    for s, scores in enumerate(data):
-        for t, team in enumerate(judge.teams):
-            try:
-                judge.teams[t].questions[str(s+1)] = int(scores[t])
-            except ValueError:
-                if scores[t] == "":
-                    judge.teams[t].questions[str(s+1)] = ""
-                else:
-                    raise
+    for round, questions in data.items():
+        for qnumber, answers in questions.items():
+            for teamname, answer in answers.items():
+                for i, team in enumerate(judge.teams):
+                    if team.name == teamname:
+                        judge.teams[i].rounds[round][qnumber] = answer
     judge.save()
-    return web.Response(text="Playlist successfully deleted.")
+    return web.Response(text="success")
+
+
+@routes.get("/api/update-judge")
+async def api_updateJudge_GET(request):
+    """Handle AJAX requests for /api/judge-update"""
+    judges = {}
+    for judge in Judge.obtainall():
+        judges[judge.username] = f"Q{judge.lastQuestionScored}"
+    return web.json_response({'unscored': Judge.allUnscoredQuestions(), 'judges': judges})
 
 
 # Admin is only enabled if setting say so.

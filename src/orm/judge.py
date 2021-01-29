@@ -70,6 +70,15 @@ class Judge:
         return judges
 
     @classmethod
+    def allUnscoredQuestions(cls):
+        unscored = []
+        for judge in cls.obtainall():
+            for question in judge.unscoredQuestions():
+                if question not in unscored:
+                    unscored.append(question)
+        return sorted(unscored, key=lambda x: int(x))
+
+    @classmethod
     def create(cls, username, password, teamnames):
         """
         Create a judge.
@@ -133,6 +142,10 @@ class Judge:
         return placement
 
     @property
+    def lastQuestionScored(self):
+        return min(list(map(int, self.unscoredQuestions())))
+
+    @property
     def scoretable(self):
         """
         Obtain scoretable.
@@ -141,14 +154,25 @@ class Judge:
         stored scores associated with each team. It is used to render the
         judge's scoring page.
         """
-        questions = []
-        teams = self.teams
-        for question, score in teams[0].questions.items():
-            q = {}
-            for team in teams:
-                q[team.name] = team.questions[question]
-            questions.append(q)
-        return enumerate(questions)
+        rounds = {}
+        for r, questions in self.teams[0].rounds.items():
+            round = {}
+            for number, score in questions.items():
+                question = {}
+                for team in self.teams:
+                    question[team.name] = team.rounds[r][number]
+                round[number] = question
+            rounds[r] = round
+        return rounds
+
+    def unscoredQuestions(self):
+        unscored = []
+        for team in self.teams:
+            for round, questions in team.rounds.items():
+                for qnumber, answer in questions.items():
+                    if answer == "" and qnumber not in unscored:
+                        unscored.append(qnumber)
+        return unscored
 
     def save(self):
         """Save to JSON."""

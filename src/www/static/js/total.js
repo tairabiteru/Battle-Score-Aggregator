@@ -71,7 +71,24 @@ function sortTable() {
 }
 
 
+function updateJudges() {
+  var endpoint = "/api/update-judge";
+
+  result = communicate(endpoint, {}, method="GET")
+    .then(function (result) {
+      var judges = JSON.parse(result)['judges'];
+      for (const [judge, question] of Object.entries(judges)) {
+        document.getElementById(judge).innerHTML = question;
+      }
+    })
+    .catch(function (error) {
+      console.warn("Communication failure:", error);
+    });
+}
+
+
 window.setInterval(function () {
   updateScores();
   sortTable();
+  updateJudges();
 }, 500);

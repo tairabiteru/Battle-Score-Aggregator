@@ -1,3 +1,7 @@
+table {
+  display: none;
+}
+
 body {
   font-family: Arial, Helvetica;
   background-color: #424242;

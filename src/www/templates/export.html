@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/export.css">
+  </head>
+  <div id="content">
+    {% if placement %}
+      <table>
+        <tr>
+          <th>Place</th>
+          <th>Team</th>
+          <th>Score</th>
+        </tr>
+
+          {% for place, teams in placement.items() %}
+            {% for team, score in teams.items() %}
+            <tr>
+              <td>{{ place }}</td>
+              <td>{{ team }}</td>
+              <td>{{ score }}</td>
+            </tr>
+            {% endfor %}
+          {% endfor %}
+      </table>
+    {% else %}
+      No teams have been created yet.
+    {% endif %}
+  </div>
+  <br>
+  <a id="download">Export Totals as HTML</a>
+  <br><br>
+
+  {% for judge in judges %}
+    <table id="{{ judge.username }}_table">
+      <th>Question</th>
+      {% for team in judge.teams %}
+      <th>{{ team.name }}</th>
+      {% endfor %}
+
+      {% for round, questions in judge.scoretable.items() %}
+        {% for number, answers in questions.items() %}
+        <tr>
+          <td>Q{{ number }}</td>
+          {% for team, score in answers.items() %}
+          <td>{{ score }}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      {% endfor %}
+    </table>
+    <a class="judgeLink" id="{{ judge.username }}">Export Score Table of {{ judge.username }}</a>
+  {% endfor %}
+  <script src="/static/js/export.js"></script>
+</html>

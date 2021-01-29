@@ -1,3 +1,4 @@
+from dash.conf import conf
 from marshmallow import Schema, fields, post_load
 
 
@@ -11,7 +12,7 @@ class TeamExists(Exception):
 
 class TeamSchema(Schema):
     name = fields.Str()
-    questions = fields.Dict(keys=fields.Str, values=fields.Str)
+    rounds = fields.Dict(keys=fields.Str, values=fields.Dict(keys=fields.Str, values=fields.Str))
 
     @post_load
     def make_obj(self, data, **kwargs):
@@ -28,16 +29,29 @@ class Team:
     """
     def __init__(self, **kwargs):
         self.name = kwargs['name']
-        self.questions = kwargs['questions'] if 'questions' in kwargs else {}
+        self.rounds = kwargs['rounds'] if 'rounds' in kwargs else {}
 
-        if self.questions == {}:
-            for i in range(1, 64):
-                self.questions[str(i)] = ""
+        if self.rounds == {}:
+            qnumber = 1
+            for i in range(1, conf.numberOfRounds + 1):
+                round = {}
+                for j in range(1, conf.questionsPerRound + 1):
+                    round[str(qnumber)] = ""
+                    qnumber += 1
+                self.rounds[f"Round {i}"] = round
+
+            for i in range(1, conf.numberOfBonusRounds + 1):
+                round = {}
+                for j in range(1, conf.questionsPerBonusRound + 1):
+                    round[str(qnumber)] = ""
+                    qnumber += 1
+                self.rounds[f"Bonus Round {i}"] = round
 
     @property
     def total(self):
         total = 0
-        for number, score in self.questions.items():
-            if score != "":
-                total += int(score)
+        for round, questions in self.rounds.items():
+            for number, score in questions.items():
+                if score != "":
+                    total += int(score)
         return total

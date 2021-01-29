@@ -2,15 +2,26 @@
 // Read and serialize the information from the current table.
 function readTable() {
   var table = document.getElementById("scoretable");
-  output = [];
+  var currentRound = "";
+  var qnumber = 1;
+  var output = {};
   for (i=1; i<table.rows.length; i++) {
     row = table.rows[i];
-    var rowdata = [];
-    for (j=1; j<row.cells.length; j++) {
-      cell = row.cells[j];
-      rowdata.push(cell.firstChild.value);
+
+
+    if (row.innerHTML.includes("Round")) {
+      currentRound = row.cells[0].innerHTML;
+      output[currentRound] = {};
+    } else {
+      var q = {};
+      for (j=1; j<row.cells.length; j++) {
+        cell = row.cells[j];
+        team = cell.firstChild.id.split("_")[0];
+        q[team] = cell.firstChild.value;
+      }
+      output[currentRound][qnumber] = q;
+      qnumber++;
     }
-    output.push(rowdata);
   }
   return output;
 }
@@ -46,30 +57,32 @@ function communicate(endpoint, data, method="POST", type="application/json") {
 // Validate scores.
 function validateScore() {
   var data = readTable();
-  var validScores = ["0", "1", "2", "4", "5"];
+  var validScores = ["0", "1", "4", "5"];
   var valid = true;
 
-  for (i=0; i<data.length; i++) {
-    for (j=0; j<data[i].length; j++) {
-      var team = document.getElementById("team_" + (j + 1)).innerHTML;
-      var box = document.getElementById(team + "_" + (i + 1));
-      if (box.value == "") {
-        box.style = "background-color: inherit;";
-      } else if (!validScores.includes(box.value)) {
-        box.style = "background-color: #ff5c5c;";
-        toastr.error("Invalid value '" + box.value + "' entered. Value must be 0, 1, 2, 4 or 5.");
-        box.value = "";
-        valid = false;
-      } else {
-        box.style = "background-color: #4CAF50;";
+  for (const [round, questions] of Object.entries(data)) {
+    for (const [qnumber, answers] of Object.entries(questions)) {
+      for (i=1; i<=Object.keys(answers).length; i++) {
+        var team = document.getElementById("team_" + i).innerHTML;
+        var box = document.getElementById(team + "_" + qnumber);
+        if (box.value == "") {
+          box.style = "background-color: inherit;";
+        } else if (!validScores.includes(box.value)) {
+          box.style = "background-color: #FF5C5C;";
+          toastr.error("Invalid value '" + box.value + "' entered. Value must be one of '" + validScores.join("', '") + "'.");
+          box.value = "";
+          valid = false;
+        } else {
+          box.style = "background-color: #4CAF50;";
+        }
       }
     }
   }
-
   if (valid) {
     saveScores();
   }
 }
+
 
 // Called to send scores to AJAX.
 function saveScores() {
@@ -87,7 +100,43 @@ function saveScores() {
     })
     .catch(function (error) {
       console.warn("Communication failure:", error);
-      alert("Communications failure!")
+      if (error['status'] == 401) {
+        alert("Session has expired. Please log in again.");
+        window.location.replace("/login");
+      } else {
+        alert("Communications failure!");
+      }
+    });
+}
+
+
+function setStatus(unscored) {
+  var data = readTable();
+
+  for (const [round, questions] of Object.entries(data)) {
+    for (const [qnumber, answers] of Object.entries(questions)) {
+      for (i=1; i<=Object.keys(answers).length; i++) {
+        var question = document.getElementById(qnumber);
+        if (unscored.includes(qnumber)) {
+          question.innerHTML = "⚠️";
+        } else {
+          question.innerHTML = "✅";
+        }
+      }
+    }
+  }
+}
+
+
+function updateStatus() {
+  var endpoint = "/api/update-judge";
+
+  result = communicate(endpoint, {}, method="GET")
+    .then(function (result) {
+      setStatus(JSON.parse(result)['unscored']);
+    })
+    .catch(function (error) {
+      console.warn("Communication failure:", error);
     });
 }
 
@@ -96,3 +145,7 @@ function saveScores() {
 document.addEventListener('DOMContentLoaded', function(event) {
   validateScore();
 });
+
+window.setInterval(function () {
+  updateStatus();
+}, 500);
