@@ -51,6 +51,16 @@ Totals can be found at `http://host:port/total`. Here, the scores and placements
 - **Can this be used on the internet?** - Alone, no. The normal operating scenario for this system is for it to be running on a server on a LAN only. In other words, this should NOT be used on the internet, as the internal server is not robust enough for that application.
 
 ## Changelog
+* Ver. α 0.4
+  - A judge's status now shows on the `/total` page.
+    - ⭕ indicates the judge is not logged in, ⚠️ indicates a judge needs help, and ✔️ indicates they are logged in, and all is good.
+  - Added in a help button for judges.
+    - When clicked, the button sets a flag which shows a ⚠️ on the `/total` page, as noted above.
+  - Implemented session IDs, which makes it impossible for a judge to login in two different places.
+  - The `/judge` page now implements a heartbeat protocol.
+    - The page will check in with the server as often as it sends updates. If a timeout is exceeded, then the judge is considered 'logged out.'
+    - This timeout is configurable in `conf.toml` but should not be set to less than a few seconds.
+    - Judges will be prevented from logging in elsewhere if they are not 'logged out.'
 * Ver. α 0.31
   - Added some documentation for judges.
 * Ver. α 0.3

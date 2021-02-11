@@ -1,6 +1,7 @@
 from dash.conf import conf
 from orm.team import Team, TeamSchema, TeamExists
 
+from datetime import datetime
 import json
 from marshmallow import Schema, fields, post_load
 import os
@@ -26,6 +27,10 @@ class JudgeSchema(Schema):
     username = fields.Str()
     password = fields.Str()
     teams = fields.List(fields.Nested(TeamSchema))
+    helpFlag = fields.Boolean()
+    lastHeartbeat = fields.DateTime(allow_none=True)
+    sessionID = fields.Str()
+
 
     @post_load
     def make_obj(self, data, **kwargs):
@@ -44,6 +49,9 @@ class Judge:
         self.username = kwargs['username']
         self.password = kwargs['password']
         self.teams = kwargs['teams'] if 'teams' in kwargs else []
+        self.helpFlag = kwargs['helpFlag'] if 'helpFlag' in kwargs else False
+        self.lastHeartbeat = kwargs['lastHeartbeat'] if 'lastHeartbeat' in kwargs else None
+        self.sessionID = kwargs['sessionID'] if 'sessionID' in kwargs else ""
 
     @classmethod
     def obtain(cls, username):
@@ -144,6 +152,13 @@ class Judge:
     @property
     def lastQuestionScored(self):
         return min(list(map(int, self.unscoredQuestions())))
+
+    @property
+    def loggedIn(self):
+        if not self.lastHeartbeat:
+            return False
+        delta = datetime.now() - self.lastHeartbeat
+        return delta.total_seconds() < conf.loginTimeout
 
     @property
     def scoretable(self):

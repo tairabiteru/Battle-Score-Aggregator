@@ -7,29 +7,35 @@
   </head>
 
   <body>
-    <h1>Welcome, Right Honorable {{ judge.username }}.</h1>
-
-    <table id="scoretable">
-      <th>Question</th>
-      {% for team in judge.teams %}
-      <th id="team_{{ loop.index }}">{{ team.name }}</th>
-      {% endfor %}
-
-      {% for round, questions in judge.scoretable.items() %}
-        <tr>
-          <td colspan="{{ judge.teams|length + 1 }}">{{ round }}</td>
-        </tr>
-
-        {% for number, scores in questions.items() %}
-        <tr>
-          <td>Q{{ number }} <div id="{{ number }}" style="display: inline;">🔄</div></td>
-          {% for team, score in scores.items() %}
-          <td><input oninput="validateScore()" type="number" id="{{ team }}_{{ number }}" min="0" max="5" value="{{ score }}"></td>
+    <div class="row">
+      <div class="column">
+        <table id="scoretable">
+          <th>Question</th>
+          {% for team in judge.teams %}
+          <th id="team_{{ loop.index }}">{{ team.name }}</th>
           {% endfor %}
-        </tr>
-        {% endfor %}
-      {% endfor %}
-    </table>
+
+          {% for round, questions in judge.scoretable.items() %}
+            <tr>
+              <td colspan="{{ judge.teams|length + 1 }}">{{ round }}</td>
+            </tr>
+
+            {% for number, scores in questions.items() %}
+            <tr>
+              <td>Q{{ number }} <div id="{{ number }}" style="display: inline;">🔄</div></td>
+              {% for team, score in scores.items() %}
+              <td><input oninput="validateScore()" type="number" id="{{ team }}_{{ number }}" min="0" max="5" value="{{ score }}"></td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          {% endfor %}
+        </table>
+      </div>
+      <div class="column">
+        <h1>Welcome, Right Honorable {{ judge.username }}.</h1>
+        <button id="helpButton" onclick="tasukete()">Help Me!</button>
+      </div>
+    </div>
   </body>
   <script src="/static/js/jquery.min.js"></script>
   <script src="/static/js/toastr.min.js"></script>

@@ -36,11 +36,19 @@
         <tr>
           <th>Judge</th>
           <th>Currently Scoring</th>
+          <th>Status</th>
         </tr>
         {% for judge in judges %}
-        <tr>
+        <tr id="{{ judge.username }}">
           <td>{{ judge.username|capitalize }}</td>
-          <td id="{{ judge.username }}">Q{{ judge.lastQuestionScored }}</td>
+          <td id="{{ judge.username }}_last_scored">Q{{ judge.lastQuestionScored }}</td>
+          <td id="{{ judge.username }}_status">
+            {% if judge.loggedIn %}
+              {% if judge.helpFlag %}⚠️{% else %}✔️{% endif %}
+            {% else %}
+              ❌
+            {% endif %}
+          </td>
         </tr>
         {% endfor %}
       </table>

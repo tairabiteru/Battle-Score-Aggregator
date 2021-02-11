@@ -133,10 +133,66 @@ function updateStatus() {
 
   result = communicate(endpoint, {}, method="GET")
     .then(function (result) {
-      setStatus(JSON.parse(result)['unscored']);
+      setStatus(JSON.parse(result)['allUnscored']);
     })
     .catch(function (error) {
       console.warn("Communication failure:", error);
+    });
+}
+
+
+function heartbeat() {
+  var endpoint = "/api/heartbeat";
+
+  result = communicate(endpoint, {}, method="POST")
+    .then(function (result) {
+
+    })
+    .catch(function (error) {
+      console.warn("Communication failure:", error);
+    });
+}
+
+
+// HELP ME
+function tasukete() {
+  var button = document.getElementById("helpButton");
+  if (button.innerHTML == "Help Me!") {
+    sendForHelp(true);
+    button.innerHTML = "Help is coming!<br>(click to cancel)";
+    button.style.animationPlayState = "running";
+  } else {
+    sendForHelp(false);
+    button.innerHTML = "Help Me!";
+    button.style.animationPlayState = "paused";
+    button.style.animationName = "none";
+    setTimeout(function() {button.style.animationName = "helpcolors";}, 100);
+  }
+}
+
+
+// Called to send for help
+function sendForHelp(flag) {
+  var endpoint = "/api/help-request";
+  var data = {'helpFlag': flag};
+
+  data = JSON.stringify(data);
+  result = communicate(endpoint, data)
+    .then(function (result) {
+      if (result.includes("Error")) {
+        alert("Error!")
+      } else {
+
+      }
+    })
+    .catch(function (error) {
+      console.warn("Communication failure:", error);
+      if (error['status'] == 401) {
+        alert("Session has expired. Please log in again.");
+        window.location.replace("/login");
+      } else {
+        alert("Communications failure!");
+      }
     });
 }
 
@@ -148,4 +204,5 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
 window.setInterval(function () {
   updateStatus();
+  heartbeat();
 }, 500);

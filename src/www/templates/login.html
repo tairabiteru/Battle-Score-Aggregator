@@ -1,10 +1,17 @@
-{% if response %}<p style="color: red;">{{ response }}</p>{% endif %}
-<form action="/login" method="post">
-  <label for="username">Username</label>
-  <input type="text" placeholder="Username" name="username" required>
-  <br>
-  <label for="password">Password</label>
-  <input type="password" placeholder="Password" name="password" required>
-  <br>
-  <button type="submit">Login</button>
-</form>
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/login.css">
+  </head>
+  <body>
+    {% if response %}<p>{{ response }}</p>{% endif %}
+    <form action="/login" method="post">
+      <input type="text" placeholder="Username" name="username" required>
+      <br>
+      <input type="password" placeholder="Password" name="password" required>
+      <br>
+      <button type="submit">Login</button>
+    </form>
+  </body>
+</html>

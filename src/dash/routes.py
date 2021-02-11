@@ -7,7 +7,9 @@ from orm.team import TeamExists
 from aiohttp import web
 from aiohttp_jinja2 import template
 from aiohttp_session import get_session
+from datetime import datetime
 from passlib.hash import bcrypt
+import uuid
 
 
 routes = web.RouteTableDef()
@@ -17,6 +19,10 @@ async def get_user(request, redirect=True):
     """Obtain the current user from the session. If none exists, redirect to login."""
     session = await get_session(request)
     try:
+        user = session['username']
+        sessionID = session['ID']
+        if sessionID != Judge.obtain(user).sessionID:
+            raise KeyError
         return session['username']
     except KeyError:
         if redirect:
@@ -65,7 +71,14 @@ async def login_POST(request):
     if not bcrypt.verify(password, judge.password):
         return {'response': "Invalid password."}
 
+    if judge.loggedIn:
+        return {'response': f"Judge is already logged in elsewhere. If you've just logged out, try waiting {conf.loginTimeout} seconds, then try again."}
+
     session['username'] = judge.username
+    sessionID = uuid.uuid4().hex
+    session['ID'] = sessionID
+    judge.sessionID = sessionID
+    judge.save()
 
     try:
         raise web.HTTPFound(session['redirect'])
@@ -118,8 +131,33 @@ async def api_updateJudge_GET(request):
     """Handle AJAX requests for /api/judge-update"""
     judges = {}
     for judge in Judge.obtainall():
-        judges[judge.username] = f"Q{judge.lastQuestionScored}"
-    return web.json_response({'unscored': Judge.allUnscoredQuestions(), 'judges': judges})
+        judges[judge.username] = {}
+        judges[judge.username]['lastScored'] = f"Q{judge.lastQuestionScored}"
+        judges[judge.username]['helpFlag'] = judge.helpFlag
+        judges[judge.username]['loggedIn'] = judge.loggedIn
+
+    return web.json_response({'allUnscored': Judge.allUnscoredQuestions(), 'judges': judges})
+
+
+@routes.post("/api/heartbeat")
+async def api_heartbeat_POST(request):
+    username = await get_user(request, redirect=False)
+    judge = Judge.obtain(username)
+    judge.lastHeartbeat = datetime.now()
+    judge.save()
+    return web.Response(text="success")
+
+
+@routes.post("/api/help-request")
+async def api_saveScores_POST(request):
+    """Handle AJAX requests for /api/help-request"""
+    username = await get_user(request, redirect=False)
+
+    judge = Judge.obtain(username)
+    data = await request.json()
+    judge.helpFlag = data['helpFlag']
+    judge.save()
+    return web.Response(text="success")
 
 
 # Admin is only enabled if setting say so.

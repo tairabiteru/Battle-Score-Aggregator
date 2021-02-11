@@ -36,11 +36,58 @@ th {
 
 h1, h3 {
   font-family: Arial, Helvetica;
-  float: right;
+  text-align: right;
 }
 
 body {
   font-family: Arial, Helvetica;
   background-color: #424242;
   color: white;
+}
+
+#helpButton {
+  font-family: Arial, Helvetica;
+  float: right;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  width: 200px;
+  height: 75px;
+  margin-right: 40px;
+  animation-name: helpcolors;
+  animation-duration: 1.5s;
+  animation-iteration-count: infinite;
+  animation-duration: alternate;
+  animation-timing-function: linear;
+  animation-play-state: paused;
+}
+
+@keyframes helpcolors {
+	0% {
+		background: #ee6055;
+	}
+	25% {
+		background: red;
+	}
+	50% {
+		background: #ee6055;
+	}
+	75% {
+		background: red;
+	}
+	100% {
+		background: #ee6055;
+	}
+}
+
+.row {
+  display: flex;
+}
+
+.column {
+  flex: 50%;
 }

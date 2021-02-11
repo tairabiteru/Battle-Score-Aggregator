@@ -77,8 +77,21 @@ function updateJudges() {
   result = communicate(endpoint, {}, method="GET")
     .then(function (result) {
       var judges = JSON.parse(result)['judges'];
-      for (const [judge, question] of Object.entries(judges)) {
-        document.getElementById(judge).innerHTML = question;
+      for (const [judge, data] of Object.entries(judges)) {
+        document.getElementById(judge + "_last_scored").innerHTML = data['lastScored'];
+        if (data['loggedIn']) {
+          if (data['helpFlag']) {
+            document.getElementById(judge + "_status").innerHTML = "⚠️";
+            document.getElementById(judge).classList.add("needsHelp");
+            document.getElementById(judge).style.animationPlayState = "running";
+          } else {
+            document.getElementById(judge + "_status").innerHTML = "✔️";
+            document.getElementById(judge).style.animationPlayState = "running";
+            document.getElementById(judge).classList.remove("needsHelp");
+          }
+        } else {
+          document.getElementById(judge + "_status").innerHTML = "⭕";
+        }
       }
     })
     .catch(function (error) {
