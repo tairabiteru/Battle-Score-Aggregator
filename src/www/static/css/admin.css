@@ -3,3 +3,42 @@ table, th, td {
   border-collapse: collapse;
   padding: 3px 3px 3px 3px;
 }
+
+td, th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #626262;
+}
+
+tr:nth-child(odd) {
+  background-color: #424242;
+}
+
+tr:hover {
+  background-color: #ccc;
+}
+
+input {
+  background-color: white;
+  color: #424242;
+  font-size: 20px;
+}
+
+body {
+  font-family: Arial, Helvetica;
+  background-color: #424242;
+  color: white;
+}
+
+button {
+  background-color: rgb(131, 52, 235);
+  border: 1px solid white;
+  color: white;
+  padding: 10px 24px;
+  cursor: pointer;
+  width: 10%;
+  display: block;
+}

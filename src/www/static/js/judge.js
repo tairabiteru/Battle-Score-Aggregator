@@ -1,3 +1,9 @@
+function decodeHTML(html) {
+  var txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
+}
+
 
 // Read and serialize the information from the current table.
 function readTable() {
@@ -64,7 +70,7 @@ function validateScore() {
     for (const [qnumber, answers] of Object.entries(questions)) {
       for (i=1; i<=Object.keys(answers).length; i++) {
         var team = document.getElementById("team_" + i).innerHTML;
-        var box = document.getElementById(team + "_" + qnumber);
+        var box = document.getElementById(decodeHTML(team) + "_" + qnumber);
         if (box.value == "") {
           box.style = "background-color: inherit;";
         } else if (!validScores.includes(box.value)) {
@@ -149,7 +155,12 @@ function heartbeat() {
 
     })
     .catch(function (error) {
-      console.warn("Communication failure:", error);
+      if (error['status'] == 401) {
+        alert("Session has expired. Please log in again.");
+        window.location.replace("/login");
+      } else {
+        alert("Communications failure!");
+      }
     });
 }
 
