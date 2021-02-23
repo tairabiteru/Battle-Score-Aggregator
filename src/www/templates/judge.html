@@ -4,6 +4,7 @@
   <head>
     <link rel="stylesheet" href="/static/css/toastr.min.css"></link>
     <link rel="stylesheet" href="/static/css/judge.css">
+    <title>BSA - Judge</title>
   </head>
 
   <body>
@@ -32,7 +33,7 @@
         </table>
       </div>
       <div class="column">
-        <h1>Welcome, Right Honorable {{ judge.username }}.</h1>
+        <h1>Welcome, Right Honorable {{ judge.username | capitalize }}.</h1>
         <button id="helpButton" onclick="tasukete()">Help Me!</button>
       </div>
     </div>

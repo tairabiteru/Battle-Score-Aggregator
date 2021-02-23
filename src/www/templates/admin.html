@@ -3,8 +3,10 @@
 <html>
   <head>
     <link rel="stylesheet" href="/static/css/admin.css">
+    <title>BSA - Admin</title>
   </head>
-
+  <h1>Battle Score Aggregator</h1>
+  <h3>Administrative Page</h3><br><br>
   <h2>Add Judge</h2>
   {% if response %}<p style="color: red;">{{ response }}</p>{% endif %}
   <form action="/admin" method="post" id="newjudge">

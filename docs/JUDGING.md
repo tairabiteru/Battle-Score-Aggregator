@@ -13,14 +13,13 @@ The judging system is modeled after Microsoft Excel. It was designed to function
 3. Each round is separated by a spacer.
 4. Scores are entered here.
 5. These icons indicate the status of the question. When all judges have entered an answer for a given question, it will be a green checkmark. Otherwise, it will be a yellow caution sign.
-6. A help button is provided to signal that you need help. If pressed, it sends a signal to whoever is watching the scoring page that you need help.
+6. A help button is provided to signal that you need help. If pressed, it sends a signal to whoever is watching the scoring page that you need help.  
 
 To score, you must:
 
   -  place your cursor in the box of the question and team you want to score. You may optionally use `TAB` to move to the next cell.
   - Enter the score.
   - That's it.
-
 
   There is no save button. There's no need for one. The page is in constant communication with the server behind the scenes, so the second you enter the score, it has already been saved. There is no need to tally or add up scores either, as the server handles that as well. The hope is that by the end of the night, there will be no scramble to add up the scores and find the winning team. In fact, we should know the winning team as soon as the last score is entered.
 

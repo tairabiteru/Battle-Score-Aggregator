@@ -104,7 +104,7 @@ class Judge:
         for teamname in teamnames:
             if teamname.lower() in list([team.name.lower() for team in cls.allTeams()]):
                 raise TeamExists(teamname)
-            teams.append(Team(name=teamname))
+            teams.append(Team(name=teamname, judge=username))
 
         judge = Judge(username=username, password=password, teams=teams)
         judge.save()
@@ -141,7 +141,7 @@ class Judge:
             while max([team.total for team in teams]) == highest:
                 for team in teams:
                     if team.total == highest:
-                        team_placement[team.name] = team.total
+                        team_placement[team.name] = {'total': team.total, 'judge': team.judge.capitalize()}
                         teams.remove(team)
                 if teams == []:
                     break

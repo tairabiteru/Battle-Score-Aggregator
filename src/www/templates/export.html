@@ -3,7 +3,10 @@
 <html>
   <head>
     <link rel="stylesheet" href="/static/css/export.css">
+    <title>BSA - Export</title>
   </head>
+  <h1>Battle Score Aggregator</h1>
+  <h3>Export Page</h3>
   <div id="content">
     {% if placement %}
       <table>
@@ -29,7 +32,7 @@
   </div>
   <br>
   <a id="download">Export Totals as HTML</a>
-  <br><br>
+  <br><br><br>
 
   {% for judge in judges %}
     <table id="{{ judge.username }}_table">
@@ -49,7 +52,7 @@
         {% endfor %}
       {% endfor %}
     </table>
-    <a class="judgeLink" id="{{ judge.username }}">Export Score Table of {{ judge.username }}</a>
+    <a class="judgeLink" id="{{ judge.username }}">Export Score Table of {{ judge.username }}</a><br><br>
   {% endfor %}
   <script src="/static/js/export.js"></script>
 </html>

@@ -34,9 +34,10 @@ function updateScores() {
     .then(function (result) {
       result = JSON.parse(result);
       for (const [place, team] of Object.entries(result)) {
-        for (const [name, score] of Object.entries(team)) {
-          document.getElementById(name + "_total").innerHTML = score;
+        for (const [name, data] of Object.entries(team)) {
+          document.getElementById(name + "_total").innerHTML = data['total'];
           document.getElementById(name + "_name").innerHTML = name;
+          document.getElementById(name + "_judge").innerHTML = data['judge'];
           document.getElementById(name + "_place").innerHTML = place;
         }
       }

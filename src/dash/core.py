@@ -1,7 +1,14 @@
-"""Module that defines the dashboard."""
+"""
+This module defines the dashboard.
+
+The dashboard is effectively the web interface that the user interacts with.
+This module defines the configuration of the dashboard from conf.py, then
+sets the routes from routes.py.
+"""
 
 from dash.conf import conf
 from dash.routes import routes
+from orm.judge import Judge
 
 from aiohttp import web
 import aiohttp_jinja2
@@ -16,7 +23,6 @@ class Dash:
     """Class defines the dashboard."""
 
     def __init__(self):
-        """Initialize dashboard."""
         self.host = conf.host
         self.port = conf.port
         self.templateDirectory = conf.templateDirectory
@@ -26,14 +32,23 @@ class Dash:
         """Perform setup."""
         self.app = web.Application()
 
+        # Load Jinja2
         aiohttp_jinja2.setup(self.app, loader=jinja2.FileSystemLoader(self.templateDirectory))
 
+        # Set keys for session encryption
         fernet_key = fernet.Fernet.generate_key()
         secret_key = base64.urlsafe_b64decode(fernet_key)
         aiohttp_session.setup(self.app, EncryptedCookieStorage(secret_key))
 
+        # Add /static and routes
         self.app.router.add_static('/static/', path=self.staticDirectory, name='static')
         self.app.add_routes(routes)
+
+        # Clear all help flags
+        judges = Judge.obtainall()
+        for judge in judges:
+            judge.helpFlag = False
+            judge.save()
 
     def run(self):
         if conf.adminEnabled:

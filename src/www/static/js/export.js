@@ -27,7 +27,6 @@ document.addEventListener("DOMContentLoaded", function() {
   var judges = document.getElementsByClassName("judgeLink");
   for (judge of judges) {
     var csvFile = new Blob([export_as_csv(judge.id)], {type: "text/csv"});
-    console.log(judge);
     judge.download = judge.id + " Score Table.csv";
     judge.href = window.URL.createObjectURL(csvFile);
   };

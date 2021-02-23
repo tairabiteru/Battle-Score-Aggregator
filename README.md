@@ -51,6 +51,10 @@ Totals can be found at `http://host:port/total`. Here, the scores and placements
 - **Can this be used on the internet?** - Alone, no. The normal operating scenario for this system is for it to be running on a server on a LAN only. In other words, this should NOT be used on the internet, as the internal server is not robust enough for that application.
 
 ## Changelog
+* Ver. α 0.5
+  - A team's judge now displays next to the team on the `/total` page.
+    - Note that **this is a breaking change**, as the ORM model is now different. 
+  - Various cosmetic changes.
 * Ver. α 0.41
   - Fixed a bug which caused the `/judge` page to not work when certain characters are used in team names.
   - Admin page finally has CSS.

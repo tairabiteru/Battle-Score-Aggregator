@@ -13,6 +13,7 @@ class TeamExists(Exception):
 class TeamSchema(Schema):
     name = fields.Str()
     rounds = fields.Dict(keys=fields.Str, values=fields.Dict(keys=fields.Str, values=fields.Str))
+    judge = fields.Str()
 
     @post_load
     def make_obj(self, data, **kwargs):
@@ -29,6 +30,7 @@ class Team:
     """
     def __init__(self, **kwargs):
         self.name = kwargs['name']
+        self.judge = kwargs['judge'] if 'judge' in kwargs else ""
         self.rounds = kwargs['rounds'] if 'rounds' in kwargs else {}
 
         if self.rounds == {}:

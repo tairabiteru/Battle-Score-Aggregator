@@ -3,6 +3,7 @@
 <html>
   <head>
     <link rel="stylesheet" href="/static/css/total.css">
+    <title>BSA - Totals</title>
   </head>
 
   <div class="row">
@@ -13,15 +14,17 @@
           <tr>
             <th>Place</th>
             <th>Team</th>
+            <th>Judge</th>
             <th>Score</th>
           </tr>
 
             {% for place, teams in placement.items() %}
-              {% for team, score in teams.items() %}
+              {% for team, data in teams.items() %}
               <tr>
                 <td id="{{ team }}_place">{{ place }}</td>
                 <td id="{{ team }}_name">{{ team }}</td>
-                <td id="{{ team }}_total">{{ score }}</td>
+                <td id="{{ team }}_judge">{{ data['judge'] | capitalize }}
+                <td id="{{ team }}_total">{{ data['total'] }}</td>
               </tr>
               {% endfor %}
             {% endfor %}

@@ -1,4 +1,10 @@
-"""Main routing file."""
+"""
+Main routing module.
+
+This file contains the 'meat 'n' potatoes' as it were. It defines all of the
+"subdirectories" of the webserver, as well as the actions required on behalf
+of the server whenever one of these pages is accessed.
+"""
 
 from dash.conf import conf
 from orm.judge import Judge, JudgeNotFound, JudgeExists
@@ -12,11 +18,16 @@ from passlib.hash import bcrypt
 import uuid
 
 
+# Routing table
 routes = web.RouteTableDef()
 
 
 async def get_user(request, redirect=True):
-    """Obtain the current user from the session. If none exists, redirect to login."""
+    """
+    Obtain the current user from the session. If none exists, redirect to login.
+    Whether or not the function redirects is controlled by the kwarg, as
+    sometimes this is not desirable.
+    """
     session = await get_session(request)
     try:
         user = session['username']
@@ -34,14 +45,14 @@ async def get_user(request, redirect=True):
 @routes.get("/")
 @template("index.html")
 async def index_GET(request):
-    """Handle GET requests for /"""
+    """Handle GET requests for /."""
     return {}
 
 
 @routes.get("/judge")
 @template("judge.html")
 async def judge_GET(request):
-    """Handle GET requests for /judge"""
+    """Handle GET requests for /judge."""
     username = await get_user(request)
     judge = Judge.obtain(username)
     return {'judge': judge}
@@ -57,34 +68,48 @@ async def login_GET(request):
 @routes.post("/login")
 @template("login.html")
 async def login_POST(request):
-    """Handle POST requests for /login"""
+    """
+    Handle POST requests for /login.
+
+    A POST request is sent from /login when the user actually tries to log in.
+    Thus, we need to validate their password entry, then redirect them
+    to the appropriate page. We also check here to see if a judge is already
+    logged in elsewhere, since under this system, we do not permit multiple
+    logins, as it could cause data collisions.
+    """
     session = await get_session(request)
     post = await request.post()
 
     username = post.get("username")
     password = post.get("password")
 
+    # Validate username
     try:
         judge = Judge.obtain(username)
     except JudgeNotFound:
         return {'response': f"No user named '{username}' exists."}
+
+    # Validate password entry
     if not bcrypt.verify(password, judge.password):
         return {'response': "Invalid password."}
 
+    # Check for existing logins.
     if judge.loggedIn:
         return {'response': f"Judge is already logged in elsewhere. If you've just logged out, try waiting {conf.loginTimeout} seconds, then try again."}
 
+    # Login successful, set session and server-side session info.
     session['username'] = judge.username
     sessionID = uuid.uuid4().hex
     session['ID'] = sessionID
     judge.sessionID = sessionID
     judge.save()
 
+    # If a redirect was specified in their session, redirect to that page.
+    # Otherwise, redirect to /judge.
     try:
         raise web.HTTPFound(session['redirect'])
     except KeyError:
         raise web.HTTPFound("/judge")
-
     return {'response': ''}
 
 
@@ -102,6 +127,10 @@ async def export_GET(request):
     return {'placement': Judge.placement(), 'judges': Judge.obtainall()}
 
 
+# Pages prefixed with /api/ are all pages which are not meant to be accessed
+# directly. Instead, they allow JS to communicate with the server behind the
+# scenes using AJAX.
+
 @routes.get("/api/total")
 async def total(request):
     """Handle AJAX requests for /total"""
@@ -110,12 +139,17 @@ async def total(request):
 
 @routes.post("/api/save-scores")
 async def api_saveScores_POST(request):
-    """Handle AJAX requests for /judge"""
+    """
+    Handle AJAX requests for /judge.
+
+    This handles AJAX requests which are sent whenever a score is saved.
+    """
     username = await get_user(request, redirect=False)
 
     judge = Judge.obtain(username)
     data = await request.json()
 
+    # lol Solomon would *love* this.
     for round, questions in data.items():
         for qnumber, answers in questions.items():
             for teamname, answer in answers.items():

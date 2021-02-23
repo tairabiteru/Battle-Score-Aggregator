@@ -3,8 +3,11 @@
 <html>
   <head>
     <link rel="stylesheet" href="/static/css/login.css">
+    <title>BSA - Login</title>
   </head>
   <body>
+    <h1>Battle Score Aggregator</h1>
+    <h3>Judge Login</h3>
     {% if response %}<p>{{ response }}</p>{% endif %}
     <form action="/login" method="post">
       <input type="text" placeholder="Username" name="username" required>

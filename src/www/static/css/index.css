@@ -2,6 +2,7 @@ body {
   font-family: Arial, Helvetica;
   background-color: #424242;
   color: white;
+  text-align: center;
 }
 
 .btn-group button {
@@ -12,6 +13,8 @@ body {
   cursor: pointer;
   width: 20%;
   display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .btn-group button:not(:last-child) {
