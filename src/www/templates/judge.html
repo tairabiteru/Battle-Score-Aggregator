@@ -34,6 +34,31 @@
       </div>
       <div class="column">
         <h1>Welcome, Right Honorable {{ judge.username | capitalize }}.</h1>
+        <table class="scorekey">
+          <tr>
+            <th colspan=2>Scoring Key</th>
+          </tr>
+          <tr>
+            <td><strong>Score</strong></td>
+            <td><strong>Description</strong></td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>All incorrect</td>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td>Answer wrong, author's name correct</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Answer correct, author's name incorrect</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>All correct</td>
+          </tr>
+        </table>
         <button id="helpButton" onclick="tasukete()">Help Me!</button>
       </div>
     </div>

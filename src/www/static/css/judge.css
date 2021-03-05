@@ -37,12 +37,18 @@ th {
 h1, h3 {
   font-family: Arial, Helvetica;
   text-align: right;
+  margin-right: 40px;
 }
 
 body {
   font-family: Arial, Helvetica;
   background-color: #424242;
   color: white;
+}
+
+.scorekey {
+  float: right;
+  margin-right: 40px;
 }
 
 #helpButton {
@@ -58,6 +64,7 @@ body {
   width: 200px;
   height: 75px;
   margin-right: 40px;
+  margin-top:20px;
   animation-name: helpcolors;
   animation-duration: 1.5s;
   animation-iteration-count: infinite;
