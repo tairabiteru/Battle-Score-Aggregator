@@ -11,9 +11,9 @@
     <div class="row">
       <div class="column">
         <table id="scoretable">
-          <th>Question</th>
+          <th class="stick">Question</th>
           {% for team in judge.teams %}
-          <th id="team_{{ loop.index }}">{{ team.name }}</th>
+          <th class="stick" id="team_{{ loop.index }}">{{ team.name }}</th>
           {% endfor %}
 
           {% for round, questions in judge.scoretable.items() %}
@@ -32,7 +32,7 @@
           {% endfor %}
         </table>
       </div>
-      <div class="column">
+      <div id="panel" class="column">
         <h1>Welcome, Right Honorable {{ judge.username | capitalize }}.</h1>
         <table class="scorekey">
           <tr>

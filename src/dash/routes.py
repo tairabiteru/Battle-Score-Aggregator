@@ -163,6 +163,8 @@ async def api_saveScores_POST(request):
 @routes.get("/api/update-judge")
 async def api_updateJudge_GET(request):
     """Handle AJAX requests for /api/judge-update"""
+    username = await get_user(request, redirect=False)
+
     judges = {}
     for judge in Judge.obtainall():
         judges[judge.username] = {}
@@ -170,7 +172,7 @@ async def api_updateJudge_GET(request):
         judges[judge.username]['helpFlag'] = judge.helpFlag
         judges[judge.username]['loggedIn'] = judge.loggedIn
 
-    return web.json_response({'allUnscored': Judge.allUnscoredQuestions(), 'judges': judges})
+    return web.json_response({'allUnscored': Judge.allUnscoredQuestions(), 'judges': judges, 'helpFlag': Judge.obtain(username).helpFlag})
 
 
 @routes.post("/api/heartbeat")
@@ -183,7 +185,7 @@ async def api_heartbeat_POST(request):
 
 
 @routes.post("/api/help-request")
-async def api_saveScores_POST(request):
+async def api_helpRequest_POST(request):
     """Handle AJAX requests for /api/help-request"""
     username = await get_user(request, redirect=False)
 
@@ -191,6 +193,15 @@ async def api_saveScores_POST(request):
     data = await request.json()
     judge.helpFlag = data['helpFlag']
     judge.save()
+    return web.Response(text="success")
+
+
+@routes.post("/api/clear-help")
+async def api_clearHelp_POST(request):
+    """Handle AJAX requests for /api/clear-request"""
+    for judge in Judge.obtainall():
+        judge.helpFlag = False
+        judge.save()
     return web.Response(text="success")
 
 

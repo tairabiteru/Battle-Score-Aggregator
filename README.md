@@ -51,6 +51,11 @@ Totals can be found at `http://host:port/total`. Here, the scores and placements
 - **Can this be used on the internet?** - Alone, no. The normal operating scenario for this system is for it to be running on a server on a LAN only. In other words, this should NOT be used on the internet, as the internal server is not robust enough for that application.
 
 ## Changelog
+* Ver. α 0.6
+  - Make the help button and scoring key travel down with the scrolling.
+  - Show the question AND round on the currently scoring column.
+  - Make it so that an "administrator" can respond to a help request and clear it.
+  - Fixed a bug which caused scores to render incorrectly on the total export page.
 * Ver. α 0.55
   - There is now a scoring key on the Judge's page.
 * Ver. α 0.5

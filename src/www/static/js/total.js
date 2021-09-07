@@ -101,6 +101,19 @@ function updateJudges() {
 }
 
 
+function daijoubu() {
+  var endpoint = "/api/clear-help";
+
+  result = communicate(endpoint, {}, method="POST")
+    .then(function (result) {
+      console.log(result);
+    })
+    .catch(function (error) {
+      console.warn("Communication failure:", error);
+    });
+}
+
+
 window.setInterval(function () {
   updateScores();
   sortTable();

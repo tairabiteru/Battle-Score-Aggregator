@@ -136,10 +136,25 @@ function setStatus(unscored) {
 
 function updateStatus() {
   var endpoint = "/api/update-judge";
+  var button = document.getElementById("helpButton");
 
   result = communicate(endpoint, {}, method="GET")
     .then(function (result) {
-      setStatus(JSON.parse(result)['allUnscored']);
+      result = JSON.parse(result);
+      setStatus(result['allUnscored']);
+      if (result['helpFlag']) {
+        if (button.innerHTML == "Help Me!") {
+          button.innerHTML = "Help is coming!<br>(click to cancel)";
+          button.style.animationPlayState = "running";
+        }
+      } else {
+        if (button.innerHTML != "Help Me!") {
+          button.innerHTML = "Help Me!";
+          button.style.animationPlayState = "paused";
+          button.style.animationName = "none";
+          setTimeout(function() {button.style.animationName = "helpcolors";}, 100);
+        }
+      }
     })
     .catch(function (error) {
       console.warn("Communication failure:", error);
@@ -170,14 +185,8 @@ function tasukete() {
   var button = document.getElementById("helpButton");
   if (button.innerHTML == "Help Me!") {
     sendForHelp(true);
-    button.innerHTML = "Help is coming!<br>(click to cancel)";
-    button.style.animationPlayState = "running";
   } else {
     sendForHelp(false);
-    button.innerHTML = "Help Me!";
-    button.style.animationPlayState = "paused";
-    button.style.animationName = "none";
-    setTimeout(function() {button.style.animationName = "helpcolors";}, 100);
   }
 }
 
