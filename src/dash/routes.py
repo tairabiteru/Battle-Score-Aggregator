@@ -6,67 +6,59 @@ This file contains the 'meat 'n' potatoes' as it were. It defines all of the
 of the server whenever one of these pages is accessed.
 """
 
+
 from dash.conf import conf
 from orm.judge import Judge, JudgeNotFound, JudgeExists
 from orm.team import TeamExists
 
-from aiohttp import web
-from aiohttp_jinja2 import template
-from aiohttp_session import get_session
 from datetime import datetime
 from passlib.hash import bcrypt
+import sanic
+from sanic_jinja2 import SanicJinja2 as jinja
 import uuid
 
 
-# Routing table
-routes = web.RouteTableDef()
+routes = sanic.Blueprint(__name__.split(".")[-1])
 
 
-async def get_user(request, redirect=True):
-    """
-    Obtain the current user from the session. If none exists, redirect to login.
-    Whether or not the function redirects is controlled by the kwarg, as
-    sometimes this is not desirable.
-    """
-    session = await get_session(request)
-    try:
-        user = session['username']
-        sessionID = session['ID']
-        if sessionID != Judge.obtain(user).sessionID:
+def require_auth(func):
+    async def wrapper(request):
+        if not request.ctx.session.get('username'):
+            return sanic.response.redirect("/login")
+
+        if request.ctx.session.get('ID') != Judge.obtain(request.ctx.session.get('username')).sessionID:
             raise KeyError
-        return session['username']
-    except KeyError:
-        if redirect:
-            session['redirect'] = str(request.rel_url)
-            raise web.HTTPFound("/login")
-        raise web.HTTPUnauthorized
+        return await func(request)
+    return wrapper
+
+
+def require_auth_no_redirect(func):
+    async def wrapper(request):
+        if not request.ctx.session.get('username'):
+            raise sanic.exceptions.Forbidden
+
+        if request.ctx.session.get('ID') != Judge.obtain(request.ctx.session.get('username')).sessionID:
+            raise KeyError
+        return await func(request)
+    return wrapper
 
 
 @routes.get("/")
-@template("index.html")
+@jinja.template("index.html")
 async def index_GET(request):
     """Handle GET requests for /."""
     return {}
 
 
-@routes.get("/judge")
-@template("judge.html")
-async def judge_GET(request):
-    """Handle GET requests for /judge."""
-    username = await get_user(request)
-    judge = Judge.obtain(username)
-    return {'judge': judge}
-
-
 @routes.get("/login")
-@template("login.html")
+@jinja.template("login.html")
 async def login_GET(request):
     """Handle GET requests for /login"""
     return {}
 
 
 @routes.post("/login")
-@template("login.html")
+@jinja.template("login.html")
 async def login_POST(request):
     """
     Handle POST requests for /login.
@@ -77,54 +69,95 @@ async def login_POST(request):
     logged in elsewhere, since under this system, we do not permit multiple
     logins, as it could cause data collisions.
     """
-    session = await get_session(request)
-    post = await request.post()
+    username = request.form['username'][0]
+    password = request.form['password'][0]
 
-    username = post.get("username")
-    password = post.get("password")
-
-    # Validate username
     try:
         judge = Judge.obtain(username)
     except JudgeNotFound:
-        return {'response': f"No user named '{username}' exists."}
+        return {'response': f"No user name '{username}' exists."}
 
-    # Validate password entry
     if not bcrypt.verify(password, judge.password):
         return {'response': "Invalid password."}
 
-    # Check for existing logins.
     if judge.loggedIn:
-        return {'response': f"Judge is already logged in elsewhere. If you've just logged out, try waiting {conf.loginTimeout} seconds, then try again."}
+        return {'response': f"Judge is already logged in elsewhere. If you've just logged out, try waiting {conf.login_timeout} seconds, then try again."}
 
-    # Login successful, set session and server-side session info.
-    session['username'] = judge.username
-    sessionID = uuid.uuid4().hex
-    session['ID'] = sessionID
-    judge.sessionID = sessionID
+    request.ctx.session['username'] = judge.username
+    request.ctx.session['ID'] = uuid.uuid4().hex
+    judge.sessionID = request.ctx.session['ID']
     judge.save()
 
-    # If a redirect was specified in their session, redirect to that page.
-    # Otherwise, redirect to /judge.
     try:
-        raise web.HTTPFound(session['redirect'])
+        return sanic.response.redirect(request.ctx.session['redirect'])
     except KeyError:
-        raise web.HTTPFound("/judge")
-    return {'response': ''}
+        return sanic.response.redirect("/judge")
+
+
+@routes.get("/judge")
+@jinja.template("judge.html")
+@require_auth
+async def judge_GET(request):
+    """Handle GET requests for /judge."""
+    username = request.ctx.session.get("username")
+    judge = Judge.obtain(username)
+    return {'judge': judge}
 
 
 @routes.get("/total")
-@template("total.html")
+@jinja.template("total.html")
 async def total_GET(request):
     """Handle GET requests for /total"""
     return {'placement': Judge.placement(), 'judges': Judge.obtainall()}
 
 
 @routes.get("/export")
-@template("export.html")
+@jinja.template("export.html")
 async def export_GET(request):
     """Handle GET requests for /export"""
     return {'placement': Judge.placement(), 'judges': Judge.obtainall()}
+
+
+@routes.get("/admin")
+@jinja.template("admin.html")
+async def admin_get(request):
+    """Handle GET requests for /admin"""
+    if conf.enable_admin_interface:
+        judges = Judge.obtainall()
+        return {'judges': judges}
+    else:
+        return sanic.response.text("The admin interface is disabled.")
+
+
+@routes.post("/admin")
+@jinja.template("admin.html")
+async def admin_POST(request):
+    """Handle POST requests for /admin"""
+    if conf.enable_admin_interface is False:
+        return sanic.response.text("The admin interface is disabled.")
+
+    username = request.form["username"][0]
+    password = bcrypt.hash(request.form["password"][0])
+    judges = Judge.obtainall()
+
+    teams = []
+    for key, value in request.form.items():
+        value = value[0]
+        if key.startswith("team"):
+            if not value:
+                return {'judges': judges, 'response': 'Team names cannot be empty.'}
+            teams.append(value)
+
+    if not teams:
+        return {'judges': judges, 'response': 'You must specify at least one team per judge.'}
+
+    try:
+        Judge.create(username, password, teams)
+        return {'judges': judges, 'response': 'Judge successfully created.'}
+    except JudgeExists:
+        return {'judges': judges, 'response': f"A judge named '{username}' already exists."}
+    except TeamExists as e:
+        return {'judges': judges, 'response': f"A team named '{e.team}' already exists."}
 
 
 # Pages prefixed with /api/ are all pages which are not meant to be accessed
@@ -134,36 +167,37 @@ async def export_GET(request):
 @routes.get("/api/total")
 async def total(request):
     """Handle AJAX requests for /total"""
-    return web.json_response(Judge.placement())
+    return sanic.response.json(Judge.placement())
 
 
 @routes.post("/api/save-scores")
+@require_auth_no_redirect
 async def api_saveScores_POST(request):
     """
     Handle AJAX requests for /judge.
 
     This handles AJAX requests which are sent whenever a score is saved.
     """
-    username = await get_user(request, redirect=False)
+    username = request.ctx.session['username']
 
     judge = Judge.obtain(username)
-    data = await request.json()
 
     # lol Solomon would *love* this.
-    for round, questions in data.items():
+    for round, questions in request.json.items():
         for qnumber, answers in questions.items():
             for teamname, answer in answers.items():
                 for i, team in enumerate(judge.teams):
                     if team.name == teamname:
                         judge.teams[i].rounds[round][qnumber] = answer
     judge.save()
-    return web.Response(text="success")
+    return sanic.response.text("success")
 
 
 @routes.get("/api/update-judge")
+@require_auth_no_redirect
 async def api_updateJudge_GET(request):
     """Handle AJAX requests for /api/judge-update"""
-    username = await get_user(request, redirect=False)
+    username = request.ctx.session['username']
 
     judges = {}
     for judge in Judge.obtainall():
@@ -172,28 +206,33 @@ async def api_updateJudge_GET(request):
         judges[judge.username]['helpFlag'] = judge.helpFlag
         judges[judge.username]['loggedIn'] = judge.loggedIn
 
-    return web.json_response({'allUnscored': Judge.allUnscoredQuestions(), 'judges': judges, 'helpFlag': Judge.obtain(username).helpFlag})
+    return sanic.response.json({
+        'allUnscored': Judge.allUnscoredQuestions(),
+        'judges': judges,
+        'helpFlag': Judge.obtain(username).helpFlag
+    })
 
 
 @routes.post("/api/heartbeat")
+@require_auth_no_redirect
 async def api_heartbeat_POST(request):
-    username = await get_user(request, redirect=False)
+    username = request.ctx.session['username']
     judge = Judge.obtain(username)
     judge.lastHeartbeat = datetime.now()
     judge.save()
-    return web.Response(text="success")
+    return sanic.response.text("success")
 
 
 @routes.post("/api/help-request")
+@require_auth_no_redirect
 async def api_helpRequest_POST(request):
     """Handle AJAX requests for /api/help-request"""
-    username = await get_user(request, redirect=False)
+    username = request.ctx.session['username']
 
     judge = Judge.obtain(username)
-    data = await request.json()
-    judge.helpFlag = data['helpFlag']
+    judge.helpFlag = request.json['helpFlag']
     judge.save()
-    return web.Response(text="success")
+    return sanic.response.text("success")
 
 
 @routes.post("/api/clear-help")
@@ -202,48 +241,4 @@ async def api_clearHelp_POST(request):
     for judge in Judge.obtainall():
         judge.helpFlag = False
         judge.save()
-    return web.Response(text="success")
-
-
-# Admin is only enabled if setting say so.
-if conf.adminEnabled:
-    @routes.get("/admin")
-    @template("admin.html")
-    async def admin_get(request):
-        """Handle GET requests for /admin"""
-        judges = Judge.obtainall()
-        return {'judges': judges}
-
-    @routes.post("/admin")
-    @template("admin.html")
-    async def admin_POST(request):
-        """Handle POST requests for /admin"""
-        post = await request.post()
-
-        username = post.get("username")
-        password = bcrypt.hash(post.get("password"))
-        judges = Judge.obtainall()
-
-        teams = []
-        for key, value in post.items():
-            if key.startswith("team"):
-                if not value:
-                    return {'judges': judges, 'response': 'Team names cannot be empty.'}
-                teams.append(value)
-
-        if not teams:
-            return {'judges': judges, 'response': 'You must specify at least one team per judge.'}
-
-        try:
-            Judge.create(username, password, teams)
-            return {'judges': judges, 'response': 'Judge successfully created.'}
-        except JudgeExists:
-            return {'judges': judges, 'response': f"A judge named '{username}' already exists."}
-        except TeamExists as e:
-            return {'judges': judges, 'response': f"A team named '{e.team}' already exists."}
-
-else:
-    @routes.get("/admin")
-    async def admin_get(request):
-        """Handle GET requests for admin, even if disabled."""
-        return web.Response(text="The admin interface is disabled.")
+    return sanic.response.text("success")

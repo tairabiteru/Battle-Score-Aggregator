@@ -7,10 +7,10 @@ from marshmallow import Schema, fields, post_load
 import os
 
 
-conf.storageDirectory = os.path.join(conf.rootDirectory, "storage/")
+conf.storage_directory = os.path.join(conf.root_directory, "storage/")
 
-if not os.path.exists(conf.storageDirectory):
-    os.makedirs(conf.storageDirectory)
+if not os.path.exists(conf.storage_directory):
+    os.makedirs(conf.storage_directory)
 
 
 class JudgeNotFound(Exception):
@@ -61,7 +61,7 @@ class Judge:
         If no judge is found, JudgeNotFound is raised.
         """
         try:
-            filename = os.path.join(conf.storageDirectory, f"{username.lower()}.json")
+            filename = os.path.join(conf.storage_directory, f"{username.lower()}.json")
             with open(filename, 'r', encoding='utf-8') as file:
                 return JudgeSchema().load(json.load(file))
         except FileNotFoundError:
@@ -71,8 +71,8 @@ class Judge:
     def obtainall(cls):
         """Obtain all judges."""
         judges = []
-        for file in os.listdir(conf.storageDirectory):
-            filename = os.path.join(conf.storageDirectory, file)
+        for file in os.listdir(conf.storage_directory):
+            filename = os.path.join(conf.storage_directory, file)
             with open(filename, 'r', encoding='utf-8') as file:
                 judges.append(JudgeSchema().load(json.load(file)))
         return judges
@@ -158,7 +158,7 @@ class Judge:
         if not self.lastHeartbeat:
             return False
         delta = datetime.now() - self.lastHeartbeat
-        return delta.total_seconds() < conf.loginTimeout
+        return delta.total_seconds() < conf.login_timeout
 
     @property
     def scoretable(self):
@@ -192,9 +192,9 @@ class Judge:
     def save(self):
         """Save to JSON."""
         try:
-            os.makedirs(conf.storageDirectory)
+            os.makedirs(conf.storage_directory)
         except FileExistsError:
             pass
-        filename = os.path.join(conf.storageDirectory, f"{self.username}.json")
+        filename = os.path.join(conf.storage_directory, f"{self.username}.json")
         with open(filename, 'w', encoding='utf-8') as file:
             json.dump(JudgeSchema().dump(self), file, indent=4, separators=(',', ': '))

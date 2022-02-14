@@ -27,14 +27,14 @@ class Conf:
         'host': 'localhost',
         'port': 8080,
         # Resolves to the directory that main.py is located in
-        'rootDirectory': os.path.dirname(sys.modules['__main__'].__file__),
-        'wwwDirectory': os.path.join(os.path.dirname(sys.modules['__main__'].__file__), "www"),
-        'loginTimeout': 10,
-        'adminEnabled': True,
-        'numberOfRounds': 7,
-        'questionsPerRound': 8,
-        'numberOfBonusRounds': 1,
-        'questionsPerBonusRound': 7
+        'root_directory': os.path.dirname(sys.modules['__main__'].__file__),
+        'web_directory': os.path.join(os.path.dirname(sys.modules['__main__'].__file__), "www"),
+        'login_timeout': 10,
+        'enable_admin_interface': True,
+        'number_of_rounds': 7,
+        'questions_per_round': 8,
+        'number_of_bonus_rounds': 1,
+        'questions_per_bonus_round': 8
     }
 
     def __init__(self):
@@ -49,8 +49,8 @@ class Conf:
         # These are 'internal' settings. They're here for easy access,
         # but they do not get written to the config file, as their value
         # is based upon the rest of the settings.
-        config['templateDirectory'] = os.path.join(config['wwwDirectory'], "templates/")
-        config['staticDirectory'] = os.path.join(config['wwwDirectory'], "static/")
+        config['template_directory'] = os.path.join(config['web_directory'], "templates/")
+        config['static_directory'] = os.path.join(config['web_directory'], "static/")
 
         # Set config as attributes.
         for key, value in config.items():

@@ -7,53 +7,64 @@ sets the routes from routes.py.
 """
 
 from dash.conf import conf
+from dash.filters import filters
 from dash.routes import routes
 from orm.judge import Judge
 
-from aiohttp import web
-import aiohttp_jinja2
-import aiohttp_session
-from aiohttp_session.cookie_storage import EncryptedCookieStorage
-import base64
-from cryptography import fernet
+import coloredlogs
 import jinja2
+import logging
+import sanic
+import sanic_session
+import sanic_jinja2
+import uuid
+
+
+logger = logging.getLogger("main")
+coloredlogs.install(
+    level='DEBUG',
+    logger=logger,
+    fmt="[%(asctime)s][%(levelname)s] %(message)s"
+)
 
 
 class Dash:
-    """Class defines the dashboard."""
-
     def __init__(self):
-        self.host = conf.host
-        self.port = conf.port
-        self.templateDirectory = conf.templateDirectory
-        self.staticDirectory = conf.staticDirectory
+        # Declare app, add static directory
+        self.app = sanic.Sanic("BSA")
+        self.app.static("/static", conf.static_directory)
 
-    def setup(self):
-        """Perform setup."""
-        self.app = web.Application()
+        # Configure jinja2 and filters.
+        loader = jinja2.FileSystemLoader(conf.template_directory)
+        session = sanic_session.Session(
+            self.app,
+            interface=sanic_session.InMemorySessionInterface()
+        )
+        self.app.ctx.jinja = sanic_jinja2.SanicJinja2(self.app, loader=loader)
 
-        # Load Jinja2
-        aiohttp_jinja2.setup(self.app, loader=jinja2.FileSystemLoader(self.templateDirectory))
+        for filter in filters:
+            self.app.ctx.jinja.add_env(filter.__name__, filter, scope="filters")
 
-        # Set keys for session encryption
-        fernet_key = fernet.Fernet.generate_key()
-        secret_key = base64.urlsafe_b64decode(fernet_key)
-        aiohttp_session.setup(self.app, EncryptedCookieStorage(secret_key))
+        # Add routes
+        self.app.blueprint(routes)
 
-        # Add /static and routes
-        self.app.router.add_static('/static/', path=self.staticDirectory, name='static')
-        self.app.add_routes(routes)
-
-        # Clear all help flags
+        # Clear help flags from judges.
         judges = Judge.obtainall()
         for judge in judges:
             judge.helpFlag = False
             judge.save()
 
-    def run(self):
-        if conf.adminEnabled:
-            print("!!! WARNING !!!   ADMIN INTERFACE IS ENABLED!")
-            print("This should NEVER be enabled during production!")
-            print("If you are in production, SHUT IT DOWN IMMEDIATELY and change the config.")
-        self.setup()
-        web.run_app(self.app, host=self.host, port=self.port)
+    @classmethod
+    def run(cls):
+        if conf.enable_admin_interface:
+            logger.warning("!!! WARNING !!! ~~ ADMIN INTERFACE IS ENABLED! ~~ !!! WARNING !!!")
+            logger.warning("The admin interface should NEVER be enabled during production!")
+            logger.warning("If you are in production, shut down IMMEDIATELY and change the config.")
+
+        dash = cls()
+        dash.app.run(
+            host=conf.host,
+            port=conf.port,
+            access_log=False,
+            debug=False
+        )

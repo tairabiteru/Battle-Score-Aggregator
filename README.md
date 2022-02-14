@@ -10,16 +10,14 @@ Each year, the library I work at hosts an event called Battle of the Books. It's
 * **Python 3.9.1** - This is the version I use in production, but any version that satisfies the pip requirements will work fine.
 * **A bunch of libraries** - They can be installed with the following command on Linux:
 ```bash
-pip3 install aiohttp==3.6.2 aiohttp_jinja2 aiohttp_session jinja2 toml cryptography passlib bcrypt marshmallow
+pip3 install bcrypt coloredlogs jinja2 marshmallow passlib sanic sanic_session sanic_jinja2 toml
 ```
 Or the following command on Windows:
 ```batch
-py -3 -m pip install aiohttp==3.6.2 aiohttp_jinja2 aiohttp_session jinja2 toml cryptography passlib bcrypt marshmallow
+py -3 -m pip install bcrypt coloredlogs jinja2 marshmallow passlib sanic sanic_session sanic_jinja2 toml
 ```
 
-Please note that the `aiohttp` version __MUST__ be `3.6.2`. This is due to an issue with `aiohttp_session` which results in sessions being lost during HTTP redirects if the aiohttp version is higher than that.
-
-Also note that installing some of these libraries requires Microsoft Visual Studio C++ Build Tools to be installed.
+Also note that installing some of these libraries may require Microsoft Visual Studio C++ Build Tools to be installed.
 
 ## Installation
 * Install the above dependencies.
@@ -50,7 +48,13 @@ Totals can be found at `http://host:port/total`. Here, the scores and placements
 
 - **Can this be used on the internet?** - Alone, no. The normal operating scenario for this system is for it to be running on a server on a LAN only. In other words, this should NOT be used on the internet, as the internal server is not robust enough for that application.
 
+# Add note to judge's page that teams will appear on the scoring page in the order they are entered.
+
 ## Changelog
+* Ver. α 1.0
+  - Switch web framework from aiohttp to Sanic. Gotta go fast.
+  - Added the ability to easily add custom jinja filters.
+    - We don't really need them, but why not?
 * Ver. α 0.6
   - Make the help button and scoring key travel down with the scrolling.
   - Show the question AND round on the currently scoring column.

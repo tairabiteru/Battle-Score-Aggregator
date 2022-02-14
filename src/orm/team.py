@@ -35,16 +35,16 @@ class Team:
 
         if self.rounds == {}:
             qnumber = 1
-            for i in range(1, conf.numberOfRounds + 1):
+            for i in range(1, conf.number_of_rounds + 1):
                 round = {}
-                for j in range(1, conf.questionsPerRound + 1):
+                for j in range(1, conf.questions_per_round + 1):
                     round[str(qnumber)] = ""
                     qnumber += 1
                 self.rounds[f"Round {i}"] = round
 
-            for i in range(1, conf.numberOfBonusRounds + 1):
+            for i in range(1, conf.number_of_bonus_rounds + 1):
                 round = {}
-                for j in range(1, conf.questionsPerBonusRound + 1):
+                for j in range(1, conf.questions_per_bonus_round + 1):
                     round[str(qnumber)] = ""
                     qnumber += 1
                 self.rounds[f"Bonus Round {i}"] = round
