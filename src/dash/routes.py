@@ -21,26 +21,19 @@ import uuid
 routes = sanic.Blueprint(__name__.split(".")[-1])
 
 
-def require_auth(func):
-    async def wrapper(request):
-        if not request.ctx.session.get('username'):
-            return sanic.response.redirect("/login")
+def require_auth(redirect=True):
+    def decorator(func):
+        async def wrapper(request):
+            if not request.ctx.session.get('username'):
+                if redirect is True:
+                    return sanic.response.redirect("/login")
+                raise sanic.exceptions.Forbidden("You are not authorized to access this information.")
 
-        if request.ctx.session.get('ID') != Judge.obtain(request.ctx.session.get('username')).sessionID:
-            raise KeyError
-        return await func(request)
-    return wrapper
-
-
-def require_auth_no_redirect(func):
-    async def wrapper(request):
-        if not request.ctx.session.get('username'):
-            raise sanic.exceptions.Forbidden
-
-        if request.ctx.session.get('ID') != Judge.obtain(request.ctx.session.get('username')).sessionID:
-            raise KeyError
-        return await func(request)
-    return wrapper
+            if request.ctx.session.get('ID') != Judge.obtain(request.ctx.session.get('username')).sessionID:
+                raise KeyError
+            return await func(request)
+        return wrapper
+    return decorator
 
 
 @routes.get("/")
@@ -96,7 +89,7 @@ async def login_POST(request):
 
 @routes.get("/judge")
 @jinja.template("judge.html")
-@require_auth
+@require_auth()
 async def judge_GET(request):
     """Handle GET requests for /judge."""
     username = request.ctx.session.get("username")
@@ -171,7 +164,7 @@ async def total(request):
 
 
 @routes.post("/api/save-scores")
-@require_auth_no_redirect
+@require_auth(redirect=False)
 async def api_saveScores_POST(request):
     """
     Handle AJAX requests for /judge.
@@ -194,7 +187,7 @@ async def api_saveScores_POST(request):
 
 
 @routes.get("/api/update-judge")
-@require_auth_no_redirect
+@require_auth(redirect=False)
 async def api_updateJudge_GET(request):
     """Handle AJAX requests for /api/judge-update"""
     username = request.ctx.session['username']
@@ -214,7 +207,7 @@ async def api_updateJudge_GET(request):
 
 
 @routes.post("/api/heartbeat")
-@require_auth_no_redirect
+@require_auth(redirect=False)
 async def api_heartbeat_POST(request):
     username = request.ctx.session['username']
     judge = Judge.obtain(username)
@@ -224,7 +217,7 @@ async def api_heartbeat_POST(request):
 
 
 @routes.post("/api/help-request")
-@require_auth_no_redirect
+@require_auth(redirect=False)
 async def api_helpRequest_POST(request):
     """Handle AJAX requests for /api/help-request"""
     username = request.ctx.session['username']
