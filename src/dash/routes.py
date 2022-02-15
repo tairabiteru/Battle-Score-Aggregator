@@ -187,10 +187,9 @@ async def api_saveScores_POST(request):
 
 
 @routes.get("/api/update-judge")
-@require_auth(redirect=False)
 async def api_updateJudge_GET(request):
     """Handle AJAX requests for /api/judge-update"""
-    username = request.ctx.session['username']
+
 
     judges = {}
     for judge in Judge.obtainall():
@@ -199,11 +198,18 @@ async def api_updateJudge_GET(request):
         judges[judge.username]['helpFlag'] = judge.helpFlag
         judges[judge.username]['loggedIn'] = judge.loggedIn
 
-    return sanic.response.json({
-        'allUnscored': Judge.allUnscoredQuestions(),
-        'judges': judges,
-        'helpFlag': Judge.obtain(username).helpFlag
-    })
+    try:
+        username = request.ctx.session['username']
+        return sanic.response.json({
+            'allUnscored': Judge.allUnscoredQuestions(),
+            'judges': judges,
+            'helpFlag': Judge.obtain(username).helpFlag
+        })
+    except KeyError:
+        return sanic.response.json({
+            'allUnscored': Judge.allUnscoredQuestions(),
+            'judges': judges
+        })
 
 
 @routes.post("/api/heartbeat")
