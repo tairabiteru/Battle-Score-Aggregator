@@ -217,10 +217,82 @@ function sendForHelp(flag) {
 }
 
 
+// Compute translation given table, the cell coordinates,
+// and the delta coordinates which determine the translation.
+// Values passed should be in terms of quadrant IV.
+function translate(table, coord, delta) {
+  var newCoord = [coord[0] + delta[0], coord[1] + delta[1]];
+
+  var row = table.rows[newCoord[0]];
+  if (row == null || newCoord[0] < 2) {
+    newCoord[0] = coord[0];
+  } else if (row.firstElementChild.colSpan != 1) {
+    if (delta[0] > 0) {
+      newCoord[0] = newCoord[0] + 1;
+    } else if (delta[0] < 0) {
+      newCoord[0] = newCoord[0] - 1;
+    }
+  }
+
+  var cell = table.rows[newCoord[0]].cells[newCoord[1]];
+  if (cell == null || newCoord[1] < 1) {
+    newCoord[1] = coord[1];
+  }
+
+  return newCoord;
+}
+
+
+// Handle keypress event
+function handleKeyPress(event) {
+  // Current cell coordinate
+  var cidx = event.srcElement.parentNode.cellIndex;
+  // Current row coordinate
+  var ridx = event.srcElement.parentNode.parentNode.rowIndex;
+
+  var table = document.getElementById("scoretable");
+  const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter"];
+
+  // Cancel all further actions if the key is not a valid key.
+  if (!validKeys.includes(event.key)) {
+    return;
+  }
+
+  // Use translate() to compute new coordinates given key input.
+  if (event.key == "ArrowDown") {
+    coords = translate(table, [ridx, cidx], [1, 0]);
+  }
+  if (event.key == "ArrowUp") {
+    coords = translate(table, [ridx, cidx], [-1, 0]);
+  }
+  if (event.key == "ArrowRight") {
+    coords = translate(table, [ridx, cidx], [0, 1]);
+  }
+  if (event.key == "ArrowLeft") {
+    coords = translate(table, [ridx, cidx], [0, -1]);
+  }
+  if (event.key == "Enter") {
+    coords = translate(table, [ridx, cidx], [0, 1]);
+    if (coords[0] == ridx && coords[1] == cidx) {
+      coords = translate(table, [ridx, 1], [1, 0]);
+      if (coords[0] == ridx) {
+        coords = [ridx, cidx];
+      }
+    }
+  }
+
+  // Focus the <input> element in the box at the computed coordinate pair.
+  var box = table.rows[coords[0]].cells[coords[1]];
+  box.firstElementChild.focus();
+}
+
+
 // Perform on page load
 document.addEventListener('DOMContentLoaded', function(event) {
   validateScore();
 });
+
+document.addEventListener('keydown', handleKeyPress);
 
 window.setInterval(function () {
   updateStatus();

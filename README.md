@@ -49,6 +49,12 @@ Totals can be found at `http://host:port/total`. Here, the scores and placements
 - **Can this be used on the internet?** - Alone, no. The normal operating scenario for this system is for it to be running on a server on a LAN only. In other words, this should NOT be used on the internet, as the internal server is not robust enough for that application.
 
 ## Changelog
+* Ver. α 1.1
+  - Add the ability to use the arrow keys or `ENTER` to move around the judge's scoring table.
+  - Change the `<input>` boxes on the judge's page to be text fields instead of number fields.
+  - Fix some rendering issues caused by extreme page width.
+  - Correct small rendering issues for Firefox.
+  - Update documentation.
 * Ver. α 1.0
   - Switch web framework from aiohttp to Sanic. Gotta go fast.
   - Added the ability to easily add custom jinja filters.

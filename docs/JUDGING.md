@@ -18,6 +18,7 @@ The judging system is modeled after Microsoft Excel. It was designed to function
 To score, you must:
 
   -  place your cursor in the box of the question and team you want to score. You may optionally use `TAB` to move to the next cell.
+    - You can also use the arrow keys to move around, or hit `ENTER` to advance you to the next cell, much like `TAB`.
   - Enter the score.
   - That's it.
 

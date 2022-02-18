@@ -25,7 +25,7 @@
             <tr>
               <td>Q{{ number }} <div id="{{ number }}" style="display: inline;">🔄</div></td>
               {% for team, score in scores.items() %}
-              <td><input oninput="validateScore()" type="number" id="{{ team }}_{{ number }}" min="0" max="5" value="{{ score }}"></td>
+              <td><input oninput="validateScore()" type="text" id="{{ team }}_{{ number }}" maxlength="1" value="{{ score }}"></td>
               {% endfor %}
             </tr>
             {% endfor %}
