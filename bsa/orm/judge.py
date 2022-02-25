@@ -1,5 +1,5 @@
-from dash.conf import conf
-from orm.team import Team, TeamSchema, TeamExists
+from ..dash.conf import conf
+from .team import Team, TeamSchema, TeamExists
 
 from datetime import datetime
 import json

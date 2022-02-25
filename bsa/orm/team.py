@@ -1,4 +1,4 @@
-from dash.conf import conf
+from bsa.dash.conf import conf
 from marshmallow import Schema, fields, post_load
 
 

@@ -6,10 +6,10 @@ This module defines the configuration of the dashboard from conf.py, then
 sets the routes from routes.py.
 """
 
-from dash.conf import conf
-from dash.filters import filters
-from dash.routes import routes
-from orm.judge import Judge
+from .conf import conf
+from .filters import jinjafilters
+from .routes import routes
+from bsa.orm.judge import Judge
 
 import coloredlogs
 import jinja2
@@ -17,7 +17,6 @@ import logging
 import sanic
 import sanic_session
 import sanic_jinja2
-import uuid
 
 
 logger = logging.getLogger("main")
@@ -36,14 +35,14 @@ class Dash:
 
         # Configure jinja2 and filters.
         loader = jinja2.FileSystemLoader(conf.template_directory)
-        session = sanic_session.Session(
+        sanic_session.Session(
             self.app,
             interface=sanic_session.InMemorySessionInterface()
         )
         self.app.ctx.jinja = sanic_jinja2.SanicJinja2(self.app, loader=loader)
 
-        for filter in filters:
-            self.app.ctx.jinja.add_env(filter.__name__, filter, scope="filters")
+        for jinjafilter in jinjafilters:
+            self.app.ctx.jinja.add_env(jinjafilter.__name__, jinjafilter, scope="filters")
 
         # Add routes
         self.app.blueprint(routes)
