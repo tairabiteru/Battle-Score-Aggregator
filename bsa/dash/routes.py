@@ -7,9 +7,9 @@ of the server whenever one of these pages is accessed.
 """
 
 
-from dash.conf import conf
-from orm.judge import Judge, JudgeNotFound, JudgeExists
-from orm.team import TeamExists
+from .conf import conf
+from bsa.orm.judge import Judge, JudgeNotFound, JudgeExists
+from bsa.orm.team import TeamExists
 
 from datetime import datetime
 from passlib.hash import bcrypt
@@ -74,7 +74,8 @@ async def login_POST(request):
         return {'response': "Invalid password."}
 
     if judge.loggedIn:
-        return {'response': f"Judge is already logged in elsewhere. If you've just logged out, try waiting {conf.login_timeout} seconds, then try again."}
+        return {'response': f"Judge is already logged in elsewhere.\
+         If you've just logged out, try waiting {conf.login_timeout} seconds, then try again."}
 
     request.ctx.session['username'] = judge.username
     request.ctx.session['ID'] = uuid.uuid4().hex

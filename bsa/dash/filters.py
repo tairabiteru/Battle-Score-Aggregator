@@ -1,7 +1,7 @@
-filters = []
+jinjafilters = []
 
 
-def filter(func):
+def jinjafilter(func):
     """Decorate a function to automagically make it a jinja filter!"""
-    filters.append(func)
+    jinjafilters.append(func)
     return func

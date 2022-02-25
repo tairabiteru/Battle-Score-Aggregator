@@ -8,7 +8,6 @@ the TOML format.
 """
 
 import os
-import sys
 import toml
 
 
@@ -27,8 +26,8 @@ class Conf:
         'host': 'localhost',
         'port': 8080,
         # Resolves to the directory that main.py is located in
-        'root_directory': os.path.dirname(sys.modules['__main__'].__file__),
-        'web_directory': os.path.join(os.path.dirname(sys.modules['__main__'].__file__), "www"),
+        'root_directory': os.getcwd(),
+        'web_directory': os.path.join(os.getcwd(), "www"),
         'login_timeout': 10,
         'enable_admin_interface': True,
         'number_of_rounds': 7,
@@ -40,7 +39,7 @@ class Conf:
     def __init__(self):
         # Try loading config from file. If it doesn't exist, use the base conf.
         try:
-            config = toml.load(os.path.join(os.path.dirname(sys.modules['__main__'].__file__), "conf.toml"))
+            config = toml.load(os.path.join(os.getcwd(), "conf.toml"))
         except FileNotFoundError:
             with open("conf.toml", "w") as conf:
                 toml.dump(Conf.BASE, conf)

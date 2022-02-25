@@ -124,6 +124,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 *.toml
-src/storage
-src/storage_clean
-src/storage - Copy
+storage
+.idea/*
+*.lock
