@@ -9,7 +9,7 @@ sets the routes from routes.py.
 from .conf import conf
 from .filters import jinjafilters
 from .routes import routes
-from bsa.orm.judge import Judge
+from orm.judge import Judge
 
 import coloredlogs
 import jinja2

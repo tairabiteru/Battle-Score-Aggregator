@@ -1,4 +1,4 @@
-from ..dash.conf import conf
+from dash.conf import conf
 from .team import Team, TeamSchema, TeamExists
 
 from datetime import datetime

@@ -6,23 +6,10 @@ Each year, the library I work at hosts an event called Battle of the Books. It's
 
 "That sounds like a job for a computer," I said. But facilitating information transportation between four laptops in a "foreign" network performing a job which absolutely, *positively*, **Can Not Fail** is hard. This program was written to (hopefully) meet that goal and to make scoring not only easier, but instantaneous. The hope is that, by the end of the night, there will be no need to tally scores. We will know the winning team the second the last score is entered.
 
-## Dependencies
-* **Python 3.9.1** - This is the version I use in production, but any version that satisfies the pip requirements will work fine.
-* **A bunch of libraries** - They can be installed with the following command on Linux:
-```bash
-pip3 install bcrypt coloredlogs jinja2 marshmallow passlib sanic sanic_session sanic_jinja2 toml
-```
-Or the following command on Windows:
-```batch
-py -3 -m pip install bcrypt coloredlogs jinja2 marshmallow passlib sanic sanic_session sanic_jinja2 toml
-```
-
-Also note that installing some of these libraries may require Microsoft Visual Studio C++ Build Tools to be installed.
-
 ## Installation
-* Install the above dependencies.
-* Copy the project contents to the desired folder.
-* Run `python3 main.py` on Linux, or `py -3 main.py` on Windows.
+1. Install [poetry](https://python-poetry.org/). This can be done with `python -m pip install poetry` on Linux, or `py -3 -m pip install poetry` on Windows.
+2. Clone the repository to a directory of your choice. Then within the repository, run `poetry install`. This will install the project's required dependencies.
+3. Start Battle Score Aggregator with `python ./bsa` on Linux, or `py -3 ./bsa` on Windows.
 
 ## Usage
 The admin interface is enabled by default, as in new installations, the first thing you'd probably want to do is to create new judges, but please note that the admin interface should **NEVER** be enabled in production. It can be disabled in `conf.toml`, once you've created your judges and teams.

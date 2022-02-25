@@ -5,11 +5,9 @@ This file contains the 'meat 'n' potatoes' as it were. It defines all of the
 "subdirectories" of the webserver, as well as the actions required on behalf
 of the server whenever one of these pages is accessed.
 """
-
-
 from .conf import conf
-from bsa.orm.judge import Judge, JudgeNotFound, JudgeExists
-from bsa.orm.team import TeamExists
+from orm.judge import Judge, JudgeNotFound, JudgeExists
+from orm.team import TeamExists
 
 from datetime import datetime
 from passlib.hash import bcrypt
