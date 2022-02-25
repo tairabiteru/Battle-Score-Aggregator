@@ -49,6 +49,8 @@ Totals can be found at `http://host:port/total`. Here, the scores and placements
 - **Can this be used on the internet?** - Alone, no. The normal operating scenario for this system is for it to be running on a server on a LAN only. In other words, this should NOT be used on the internet, as the internal server is not robust enough for that application.
 
 ## Changelog
+* Ver. α 1.2
+  - Major code refactoring. Ultimately functionality is unchanged though.
 * Ver. α 1.1
   - Add the ability to use the arrow keys or `ENTER` to move around the judge's scoring table.
   - Change the `<input>` boxes on the judge's page to be text fields instead of number fields.
