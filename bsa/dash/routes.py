@@ -30,6 +30,7 @@ def require_auth(redirect=True):
             if request.ctx.session.get('ID') != Judge.obtain(request.ctx.session.get('username')).sessionID:
                 raise KeyError
             return await func(request)
+        wrapper.__name__ = func.__name__
         return wrapper
     return decorator
 

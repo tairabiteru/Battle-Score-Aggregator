@@ -28,42 +28,41 @@ coloredlogs.install(
 
 
 class Dash:
-    def __init__(self):
-        # Declare app, add static directory
-        self.app = sanic.Sanic("BSA")
-        self.app.static("/static", conf.static_directory)
+    @staticmethod
+    def create_app(name):
+        app = sanic.Sanic("BSA")
+        app.static("/static", conf.static_directory)
 
-        # Configure jinja2 and filters.
         loader = jinja2.FileSystemLoader(conf.template_directory)
         sanic_session.Session(
-            self.app,
+            app,
             interface=sanic_session.InMemorySessionInterface()
         )
-        self.app.ctx.jinja = sanic_jinja2.SanicJinja2(self.app, loader=loader)
+        app.ctx.jinja = sanic_jinja2.SanicJinja2(app, loader=loader)
 
         for jinjafilter in jinjafilters:
-            self.app.ctx.jinja.add_env(jinjafilter.__name__, jinjafilter, scope="filters")
+            app.ctx.jinja.add_end(jinjafilter.__name__, jinjafilter, scope="filters")
+        
+        app.blueprint(routes)
 
-        # Add routes
-        self.app.blueprint(routes)
-
-        # Clear help flags from judges.
         judges = Judge.obtainall()
         for judge in judges:
             judge.helpFlag = False
             judge.save()
 
-    @classmethod
-    def run(cls):
-        if conf.enable_admin_interface:
-            logger.warning("!!! WARNING !!! ~~ ADMIN INTERFACE IS ENABLED! ~~ !!! WARNING !!!")
-            logger.warning("The admin interface should NEVER be enabled during production!")
-            logger.warning("If you are in production, shut down IMMEDIATELY and change the config.")
+        return app
 
-        dash = cls()
-        dash.app.run(
-            host=conf.host,
-            port=conf.port,
-            access_log=False,
-            debug=False
-        )
+    # @classmethod
+    # def run(cls):
+    #     if conf.enable_admin_interface:
+    #         logger.warning("!!! WARNING !!! ~~ ADMIN INTERFACE IS ENABLED! ~~ !!! WARNING !!!")
+    #         logger.warning("The admin interface should NEVER be enabled during production!")
+    #         logger.warning("If you are in production, shut down IMMEDIATELY and change the config.")
+
+    #     dash = cls()
+    #     dash.app.run(
+    #         host=conf.host,
+    #         port=conf.port,
+    #         access_log=False,
+    #         debug=False
+    #     )
